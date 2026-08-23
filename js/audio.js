@@ -223,6 +223,38 @@ RA.audio = (() => {
         'KhKhhhKhShhhKhSh',
         'KhKhhhKhShhhShKS'
       ]
+    },
+    blockfall: {
+      tempo: 120,
+      bars: 2,
+      lead: [
+        'E5 -- B4 -- C5 -- A4 -- E4 -- A4 B4 C5 -- D5 -- E5 --',
+        'E5 -- B4 -- C5 -- A4 -- C4 -- E4 G4 B4 -- A4 -- G#4 --'
+      ],
+      bass: [
+        'A2 -- A2 A2 E2 -- E2 E2 F2 -- F2 F2 G2 -- G2 G2',
+        'A2 -- A2 A2 E2 -- E2 E2 D2 -- D2 D2 E2 -- E2 E2'
+      ],
+      drums: [
+        'K h K h S h K h K h K h S h K h',
+        'K h K h S h K h K h S h S hh S h'
+      ]
+    },
+    brickbreak: {
+      tempo: 138,
+      bars: 2,
+      lead: [
+        'C5 E5 G5 E5 C5 E5 G5 E5 D5 F5 A5 F5 D5 F5 A5 F5',
+        'B4 D5 G5 D5 B4 D5 G5 D5 C5 E5 G5 C6 B5 G5 D5 B4'
+      ],
+      bass: [
+        'C3 C3 G2 G2 C3 C3 G2 G2 A2 A2 E2 E2 F2 F2 G2 G2',
+        'G2 G2 D3 D3 G2 G2 D3 D3 C3 C3 G2 G2 G2 G2 G2 G2'
+      ],
+      drums: [
+        'KhhSKhhKKhhSKhKS',
+        'KhhSKhhKKhhSShKS'
+      ]
     }
   };
 

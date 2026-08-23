@@ -9,7 +9,9 @@ const GAMES = [
   { id: 'shooter', title: 'GALAXY RAIDERS', desc: '침입자 격파 · 웨이브 슈팅',   mod: 'shooter', hue: '#7dff8a', icon: '✦' },
   { id: 'racing',  title: 'TURBO RUSH',    desc: '3랩 타임 어택 레이스',         mod: 'racing',  hue: '#ff8844', icon: '◈' },
   { id: 'rpg',     title: 'DUNGEON DEPTHS', desc: '5층 던전 액션 RPG',           mod: 'rpg',     hue: '#b967ff', icon: '⚔' },
-  { id: 'worm',    title: 'WORM.IO',       desc: '지렁이 키우기 · 봇전',         mod: 'worm',    hue: '#ff66d9', icon: '~' }
+  { id: 'worm',    title: 'WORM.IO',       desc: '지렁이 키우기 · 봇전',         mod: 'worm',    hue: '#ff66d9', icon: '~' },
+  { id: 'blockfall', title: 'BLOCK FALL',  desc: '고전 블록 퍼즐 · 줄 지우기',   mod: 'blockfall', hue: '#4d79ff', icon: '▦' },
+  { id: 'brickbreak', title: 'BRICK BREAK', desc: '벽돌깨기 · 아이템 콤보',      mod: 'brickbreak', hue: '#ff3355', icon: '▬' }
 ];
 
 function refreshLobby() {

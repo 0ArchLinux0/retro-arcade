@@ -1,6 +1,6 @@
 # RETRO ARCADE — 레트로 아케이드
 
-고전 오락실 감성의 모바일 게임 팩 (6종). 설치/빌드 없이 브라우저에서 바로 실행되며, 홈 화면에 추가하면 오프라인에서도 플레이할 수 있습니다.
+고전 오락실 감성의 모바일 게임 팩 (8종). 설치/빌드 없이 브라우저에서 바로 실행되며, 홈 화면에 추가하면 오프라인에서도 플레이할 수 있습니다.
 
 ## 게임
 
@@ -12,6 +12,8 @@
 | TURBO RUSH | 톱다운 레이싱 | 드래그 조향 · 자동 가속, 3랩 |
 | DUNGEON DEPTHS | 초경량 액션 RPG | 드래그 이동 · 자동 공격, 5층 |
 | WORM.IO | 지렁이/io풍 | 드래그 조종 + BOOST 버튼 |
+| BLOCK FALL | 고전 블록 퍼즐 (테트리스풍) | 탭 좌/우 = 이동 · 가운데 = 회전 · 아래 스와이프 = 하드드롭 |
+| BRICK BREAK | 벽돌깨기 (Breakout풍) | 드래그 패들 · 자동 발사, 아이템 3종 · 콤보 · 5스테이지 |
 
 ## 실행
 
@@ -38,10 +40,12 @@ python3 -m http.server 8123
 헤드리스(Node) 스위트가 전부 통과된 상태입니다:
 
 ```bash
-node tests/run-headless.js    # 6개 게임 20~25초 시뮬레이션 + 오디오/로비
-node tests/verify-fixes.js    # 핵심 버그 수정 회귀 검증 (RPG 피격·레이싱 완주·웜 봇 정리)
-node tests/diag-race.js       # 레이싱 트랙 지오메트리 진단 도구
-node tests/verify-race.js     # 비례 조향 드라이버로 실제 3랩 완주 검증 (20/20 체크포인트)
+node tests/run-headless.js       # 8개 게임 20~25초 시뮬레이션 + 오디오/로비
+node tests/verify-blockfall.js   # 블록 퍼즐 탭 입력/중력/스태킹 스모크
+node tests/verify-brickbreak.js  # 벽돌깨기 드래그 플레이 + 공 소실 경로 검증
+node tests/verify-fixes.js       # 핵심 버그 수정 회귀 (RPG 피격·레이싱 완주·웜 봇 정리)
+node tests/diag-race.js          # 레이싱 트랙 지오메트리 진단 도구
+node tests/verify-race.js        # 비례 조향 드라이버로 실제 3랩 완주 검증
 ```
 
 지속 감시(디버깅 시각화):
@@ -72,9 +76,9 @@ retro-arcade/
 ├── css/style.css
 ├── js/
 │   ├── core.js       # 캔버스/입력/파티클/HUD 엔진
-│   ├── audio.js      # 칩튠 사운드 엔진 (BGM 7종 + SFX)
+│   ├── audio.js      # 칩튠 사운드 엔진 (BGM 9종 + SFX)
 │   ├── lobby.js      # 로비
-│   └── games/*.js    # 게임 6종
+│   └── games/*.js    # 게임 8종
 ├── icons/
 └── tests/            # 헤드리스 테스트 스위트
 ```

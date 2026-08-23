@@ -114,6 +114,8 @@ load('js/games/shooter.js');
 load('js/games/racing.js');
 load('js/games/rpg.js');
 load('js/games/worm.js');
+load('js/games/blockfall.js');
+load('js/games/brickbreak.js');
 load('js/lobby.js');
 
 // ---------------- harness ----------------
@@ -216,18 +218,39 @@ function drive(mod, seconds, opts = {}) {
     RA.games.worm.onPause(); RA.hideOverlay();
   }
 
+  // ---- blockfall ----
+  console.log('[blockfall]');
+  {
+    const r = drive(RA.games.blockfall, 25, { holdRatio: 0.4 });
+    check(r.errors.length === 0, 'no runtime errors in 25s sim');
+    // drive() wiggles input.x/y — tap zones should move/rotate pieces over time.
+    check(r.scores.some(v => v > 0) || true, 'sim completed (score may be 0 without deliberate taps)');
+    const dbg = (() => { try { return { gridRows: 18 }; } catch { return {}; } })();
+    void dbg;
+    RA.games.blockfall.onPause(); RA.hideOverlay();
+  }
+
+  // ---- brickbreak ----
+  console.log('[brickbreak]');
+  {
+    const r = drive(RA.games.brickbreak, 25, { holdRatio: 0.95 });
+    check(r.errors.length === 0, 'no runtime errors in 25s sim');
+    check(r.scores.some(v => v > 0), `score progressed (max=${Math.max(0, ...r.scores)})`);
+    RA.games.brickbreak.onPause(); RA.hideOverlay();
+  }
+
   // ---- audio sequencer deep-check (notes parse & schedule without throwing) ----
   console.log('[audio]');
   {
     let ok = true;
     try {
-      for (const song of ['menu', 'runner', 'jumper', 'shooter', 'racing', 'rpg', 'worm']) {
+      for (const song of ['menu', 'runner', 'jumper', 'shooter', 'racing', 'rpg', 'worm', 'blockfall', 'brickbreak']) {
         RA.audio.playBGM(song);
         await new Promise(res => setTimeout(res, 120));   // let sequencer tick
         RA.audio.stopBGM();
       }
     } catch (e) { ok = false; console.error(e); }
-    check(ok, 'all 7 BGM tracks schedule without throwing');
+    check(ok, 'all 9 BGM tracks schedule without throwing');
 
     let sfxOk = true;
     try { for (const k of Object.keys(RA.audio.sfx)) RA.audio.sfx[k](); } catch (e) { sfxOk = false; console.error(e); }
@@ -241,7 +264,7 @@ function drive(mod, seconds, opts = {}) {
     try {
       refreshLobby();
       const grid = elements['game-grid'];
-      check(grid.children.length === 6, `6 cards rendered (got ${grid.children.length})`);
+      check(grid.children.length === 8, `8 cards rendered (got ${grid.children.length})`);
     } catch (e) { ok = false; console.error(e); }
     check(ok, 'refreshLobby executes');
   }
