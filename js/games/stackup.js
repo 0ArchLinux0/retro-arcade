@@ -150,7 +150,7 @@ RA.games.stackup = (() => {
   }
   function onStart() {
     started = true;
-    RA.audio.playBGM('flappy');
+    RA.audio.playBGM('stackup');
   }
 
   function draw(g) {

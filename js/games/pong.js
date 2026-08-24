@@ -160,7 +160,7 @@ RA.games.pong = (() => {
   }
   function onStart() {
     started = true;
-    RA.audio.playBGM('flappy');
+    RA.audio.playBGM('pong');
   }
 
   function draw(g) {
@@ -232,7 +232,7 @@ RA.games.pong = (() => {
     });
     RA.audio.stopBGM();
     const resumeHook = setInterval(() => {
-      if (!RA.isOverlayOpen()) { clearInterval(resumeHook); if (!over) RA.audio.playBGM(started ? 'flappy' : 'menu'); }
+      if (!RA.isOverlayOpen()) { clearInterval(resumeHook); if (!over) RA.audio.playBGM(started ? 'pong' : 'menu'); }
     }, 250);
   }
 

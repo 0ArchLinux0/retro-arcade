@@ -262,7 +262,7 @@ RA.games.brickbreak = (() => {
   }
   function onStart() {
     started = true;
-    RA.audio.playBGM('blockfall');
+    RA.audio.playBGM('brickbreak');
   }
 
   function draw(g) {

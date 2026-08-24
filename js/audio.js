@@ -256,6 +256,54 @@ RA.audio = (() => {
         'KhhSKhhKKhhSShKS'
       ]
     },
+    stackup: {
+      tempo: 134,
+      bars: 2,
+      lead: [
+        'C5 -- C5 D5 E5 -- G5 -- E5 -- C5 -- D5 E5 D5 --',
+        'E5 -- E5 F5 G5 -- C6 -- G5 -- E5 -- F5 G5 F5 --'
+      ],
+      bass: [
+        'C3 -- C3 -- G2 -- G2 -- A2 -- A2 -- F2 -- G2 --',
+        'A2 -- A2 -- E2 -- E2 -- F2 -- F2 -- G2 -- G2 --'
+      ],
+      drums: [
+        'KhShKhhSKhShKhhS',
+        'KhShKhhSKhSSKhKS'
+      ]
+    },
+    snake: {
+      tempo: 118,
+      bars: 2,
+      lead: [
+        'E4 G4 A4 -- C5 -- A4 G4 E4 G4 A4 -- B4 -- A4 G4',
+        'D4 F4 G4 -- B4 -- G4 F4 D4 F4 G4 -- A4 -- G4 F4'
+      ],
+      bass: [
+        'A2 A2 E3 E3 F2 F2 C3 C3 G2 G2 D3 D3 E2 E2 B2 B2',
+        'F2 F2 C3 C3 G2 G2 D3 D3 A2 A2 E3 E3 B2 B2 E2 E2'
+      ],
+      drums: [
+        'K h K h S h K h K h S h K h S h',
+        'K h K h S h K h S h S h K h S h'
+      ]
+    },
+    pong: {
+      tempo: 128,
+      bars: 2,
+      lead: [
+        'A4 -- E5 -- A4 C5 E5 -- D5 -- F5 -- D5 F5 A5 --',
+        'G4 -- D5 -- G4 B4 D5 -- C5 -- E5 -- C5 E5 G5 --'
+      ],
+      bass: [
+        'A2 A2 A3 A2 F2 F2 F3 F2 G2 G2 G3 G2 E2 E2 E3 E2',
+        'C3 C3 C4 C3 G2 G2 G3 G2 D3 D3 D4 D3 E2 E2 E3 E2'
+      ],
+      drums: [
+        'KhSKhhhSKhSKhhhS',
+        'KhSKhhhSKhSShKKS'
+      ]
+    },
     flappy: {
       tempo: 126,
       bars: 2,
@@ -274,11 +322,18 @@ RA.audio = (() => {
     }
   };
 
-  function parseTrack(arr, bars) {
+  function parseTrack(arr, bars, isDrum) {
     // flatten to array of tokens length = bars*16
     const out = [];
-    for (const line of arr) out.push(...line.trim().split(/\s+/));
-    while (out.length < bars * 16) out.push('--');
+    for (const line of arr) {
+      if (isDrum && !line.includes(' ')) {
+        // drum lines may be written without spaces ('KhShSKh...'); one char = one step
+        out.push(...line.trim().replace(/hh/g, 'h h').split(''));
+      } else {
+        out.push(...line.trim().split(/\s+/));
+      }
+    }
+    while (out.length < bars * 16) out.push(isDrum ? '.' : '--');
     return out.slice(0, bars * 16);
   }
 
@@ -371,9 +426,9 @@ RA.audio = (() => {
     stopBGM();
     TEMPO_CUR = song.tempo || 140;
     parseCache = {
-      lead: parseTrack(song.lead, song.bars),
-      bass: parseTrack(song.bass, song.bars),
-      drums: parseTrack(song.drums, song.bars)
+      lead: parseTrack(song.lead, song.bars, false),
+      bass: parseTrack(song.bass, song.bars, false),
+      drums: parseTrack(song.drums, song.bars, true)
     };
     curSong = song;
     if (actx.state === 'running') startSequencer();

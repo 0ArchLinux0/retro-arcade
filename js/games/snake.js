@@ -170,7 +170,7 @@ RA.games.snake = (() => {
     RA.audio.playBGM('menu');
   }
   function onStart() {
-    RA.audio.playBGM('flappy');
+    RA.audio.playBGM('snake');
   }
 
   function draw(g) {

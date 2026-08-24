@@ -1,5 +1,5 @@
 // Retro Arcade — minimal offline-first service worker
-const CACHE = 'ra-v3';
+const CACHE = 'ra-v4';
 const ASSETS = [
   './',
   './index.html',
