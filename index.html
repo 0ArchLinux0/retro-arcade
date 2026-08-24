@@ -21,10 +21,23 @@
   <div id="screen-lobby" class="screen active">
     <header class="lobby-head">
       <h1 class="logo">RETRO<span>ARCADE</span></h1>
-      <p class="tagline">12 GAMES · INSERT COIN ▮</p>
-      <button id="btn-mute" class="mute-btn" title="사운드 켜기/끄기">♪ ON</button>
+      <p class="tagline">13 GAMES · INSERT COIN ▮</p>
+      <div class="head-btns">
+        <span id="coin-count" class="coin-badge" title="보유 코인">0¢</span>
+        <button id="btn-mute" class="mute-btn" title="사운드 켜기/끄기">♪ ON</button>
+      </div>
     </header>
     <main id="game-grid"></main>
+    <section id="meta-panels">
+      <div class="panel-col">
+        <h2 class="panel-title">DAILY MISSIONS <span class="panel-reset-hint">매일 자정 리셋</span></h2>
+        <div id="mission-list"></div>
+      </div>
+      <div class="panel-col">
+        <h2 class="panel-title">SKIN SHOP</h2>
+        <div id="shop-grid"></div>
+      </div>
+    </section>
     <footer class="lobby-foot">© 2026 RETRO ARCADE · MADE WITH ♥ &amp; CANVAS</footer>
   </div>
 
@@ -46,6 +59,7 @@
 
   <script src="js/core.js"></script>
   <script src="js/audio.js"></script>
+  <script src="js/meta.js"></script>
   <script src="js/games/runner.js"></script>
   <script src="js/games/jumper.js"></script>
   <script src="js/games/shooter.js"></script>
@@ -58,6 +72,7 @@
   <script src="js/games/stackup.js"></script>
   <script src="js/games/snake.js"></script>
   <script src="js/games/pong.js"></script>
+  <script src="js/games/mergedrop.js"></script>
   <script src="js/lobby.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

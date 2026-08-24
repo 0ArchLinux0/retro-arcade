@@ -1,5 +1,5 @@
 // ============================================================
-// Retro Arcade — lobby (game select screen)
+// Retro Arcade — lobby (game select + meta panels)
 // ============================================================
 'use strict';
 
@@ -15,8 +15,13 @@ const GAMES = [
   { id: 'flappy',   title: 'FLAPPY WING',  desc: '원탭 플래피 · 파이프 통과',    mod: 'flappy',   hue: '#ffe066', icon: '🐦' },
   { id: 'stackup',  title: 'STACK UP',     desc: '타워 쌓기 · PERFECT 콤보',     mod: 'stackup',  hue: '#b967ff', icon: '▤' },
   { id: 'snake',    title: 'SNAKE CLASSIC', desc: '그리드 스네이크 · 성장',      mod: 'snake',    hue: '#7dff8a', icon: '⌗' },
-  { id: 'pong',     title: 'PONG DUEL',    desc: 'AI 패들 대전 · 7점 선승',      mod: 'pong',     hue: '#00eaff', icon: '◉' }
+  { id: 'pong',     title: 'PONG DUEL',    desc: 'AI 패들 대전 · 7점 선승',      mod: 'pong',     hue: '#00eaff', icon: '◉' },
+  { id: 'mergedrop', title: 'MERGE DROP',  desc: '숫자 드롭 머지 · 연쇄 콤보',   mod: 'mergedrop', hue: '#39ff14', icon: '⬢' }
 ];
+
+function coinBadge() {
+  return document.getElementById('coin-count');
+}
 
 function refreshLobby() {
   const grid = document.getElementById('game-grid');
@@ -54,6 +59,83 @@ function refreshLobby() {
     });
     grid.appendChild(card);
   }
+
+  if (RA.meta) {
+    if (coinBadge()) coinBadge().textContent = RA.meta.coins() + '¢';
+    renderMissions();
+    renderShop();
+  }
+}
+
+// ---------- daily missions panel ----------
+function renderMissions() {
+  const wrap = document.getElementById('mission-list');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  const missions = RA.meta.missionsToday();
+  missions.forEach((m, i) => {
+    const row = document.createElement('div');
+    row.className = 'mission-row' + (m.progress >= m.goal ? ' done' : '');
+    const label = document.createElement('div');
+    label.className = 'mission-label';
+    label.textContent = m.desc;
+    const barWrap = document.createElement('div');
+    barWrap.className = 'mission-bar';
+    const fill = document.createElement('div');
+    fill.className = 'mission-fill';
+    fill.style.width = Math.min(100, (m.progress / m.goal) * 100) + '%';
+    barWrap.appendChild(fill);
+    const right = document.createElement('div');
+    right.className = 'mission-right';
+    if (m.claimed) {
+      right.textContent = '✔ ' + m.reward + '¢';
+      right.classList.add('claimed');
+    } else if (m.progress >= m.goal) {
+      const btn = document.createElement('button');
+      btn.className = 'claim-btn';
+      btn.textContent = `+${m.reward}¢`;
+      btn.addEventListener('click', () => {
+        RA.meta.claimMission(i);
+        refreshLobby();
+      });
+      right.appendChild(btn);
+    } else {
+      right.textContent = `${m.progress}/${m.goal}`;
+    }
+    row.append(label, barWrap, right);
+    wrap.appendChild(row);
+  });
+}
+
+// ---------- skin shop panel ----------
+function renderShop() {
+  const wrap = document.getElementById('shop-grid');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  for (const sk of RA.meta.skinList()) {
+    const owned = RA.meta.isOwned(sk.id);
+    const active = RA.meta.currentSkin().id === sk.id;
+    const item = document.createElement('button');
+    item.className = 'skin-item' + (active ? ' active' : '');
+    item.style.setProperty('--sk-neon', sk.neon);
+    item.style.setProperty('--sk-bg', sk.bg);
+    const swatch = document.createElement('div');
+    swatch.className = 'skin-swatch';
+    const name = document.createElement('div');
+    name.className = 'skin-name';
+    name.textContent = sk.name;
+    const price = document.createElement('div');
+    price.className = 'skin-price';
+    price.textContent = active ? 'EQUIPPED' : owned ? 'TAP TO EQUIP' : `${sk.cost}¢`;
+    item.append(swatch, name, price);
+    item.addEventListener('click', () => {
+      if (active) return;
+      if (owned) RA.meta.selectSkin(sk.id);
+      else if (!RA.meta.buySkin(sk.id)) RA.audio.sfx.hit();
+      refreshLobby();
+    });
+    wrap.appendChild(item);
+  }
 }
 
 function launch(gdef) {
@@ -67,6 +149,7 @@ function launch(gdef) {
 
 // boot
 document.addEventListener('DOMContentLoaded', () => {
+  if (RA.meta && RA.meta.applySkinCSS) RA.meta.applySkinCSS();
   refreshLobby();
 
   // ?auto=<gameId> — launch straight into gameplay (recording/demo mode)

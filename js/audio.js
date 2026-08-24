@@ -319,6 +319,22 @@ RA.audio = (() => {
         'KhShhKhSKhShhKhS',
         'KhShhKhSKhSShSKS'
       ]
+    },
+    mergedrop: {
+      tempo: 124,
+      bars: 2,
+      lead: [
+        'C5 E5 G5 C6 B5 G5 E5 G5 A4 C5 F5 A5 G5 F5 E5 D5',
+        'E5 G5 B5 E6 D6 B5 G5 B5 C5 E5 A5 C6 B5 A5 G5 F5'
+      ],
+      bass: [
+        'C3 G2 C3 G2 A2 E2 A2 E2 F2 C3 F2 C3 G2 D3 G2 D3',
+        'A2 E3 A2 E3 F2 C3 F2 C3 C3 G2 C3 G2 G2 D3 G2 B2'
+      ],
+      drums: [
+        'KhKhShKhKhKhShKS',
+        'KhKhShKhSShKShKS'
+      ]
     }
   };
 

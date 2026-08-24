@@ -221,6 +221,13 @@ const RA = (() => {
     const s = getScores();
     if (!(id in s) || score > s[id].best) s[id] = { best: score };
     try { localStorage.setItem(KEY, JSON.stringify(s)); } catch {}
+    if (RA.meta && RA.meta.onGameEnd) {
+      const earned = RA.meta.onGameEnd(id, score);
+      if (earned > 0 && hudBest) {
+        hudBest.textContent = `BEST ${fmt(best(id))}  ·  +${earned}¢`;
+        setTimeout(refreshBest, 2600);
+      }
+    }
   }
 
   // ---------- HUD / overlay ----------

@@ -44,7 +44,8 @@ const ctxStub = new Proxy(ctxProxyTarget, {
 
 const elements = {};
 ['game', 'hud', 'hud-title', 'hud-score', 'hud-best', 'btn-pause', 'btn-exit',
- 'overlay', 'screen-game', 'screen-lobby'].forEach(id => elements[id] = mkEl('div'));
+ 'overlay', 'screen-game', 'screen-lobby', 'game-grid', 'coin-count',
+ 'mission-list', 'shop-grid'].forEach(id => elements[id] = mkEl('div'));
 elements['game'] = mkEl('canvas');
 
 global.document = {
@@ -52,6 +53,7 @@ global.document = {
   createElement: tag => mkEl(tag),
   addEventListener() {}
 };
+global.document.documentElement = { style: { setProperty() {} } };
 
 global.window = global;
 global.innerWidth = 390;
@@ -108,6 +110,7 @@ function load(rel) {
 }
 load('js/core.js');
 load('js/audio.js');
+load('js/meta.js');
 load('js/games/runner.js');
 load('js/games/jumper.js');
 load('js/games/shooter.js');
@@ -120,6 +123,7 @@ load('js/games/flappy.js');
 load('js/games/stackup.js');
 load('js/games/snake.js');
 load('js/games/pong.js');
+load('js/games/mergedrop.js');
 load('js/lobby.js');
 
 // ---------------- harness ----------------
@@ -155,6 +159,8 @@ function drive(mod, seconds, opts = {}) {
       RA.input.x = rnd() * RA.VW;
       RA.input.y = rnd() * RA.VH;
     }
+    // inject periodic taps for tap-driven games (stackup, mergedrop, ...)
+    if (opts.tapEvery && i % opts.tapEvery === 0) RA.input.justPressed = true;
     if (opts.boost !== undefined) mod.setBoost && mod.setBoost(i % 90 < 40);
     // dismiss level-up overlays in RPG so play continues
     if (RA.isOverlayOpen()) {
@@ -277,18 +283,31 @@ function drive(mod, seconds, opts = {}) {
     RA.games.pong.onPause(); RA.hideOverlay();
   }
 
+  // ---- mergedrop (deterministic gameplay driver) ----
+  console.log('[mergedrop]');
+  {
+    const r = drive(RA.games.mergedrop, 12, { tapEvery: 30 });
+    check(r.errors.length === 0, 'no runtime errors in 12s sim');
+    check(r.scores.some(v => v > 0), `score progressed (max=${Math.max(0, ...r.scores)})`);
+    RA.games.mergedrop.onPause(); RA.hideOverlay();
+    const d = RA.meta.debugState();
+    check(d.lifetimePlays >= 1, 'meta recorded a play session');
+    const dbg = RA.games.mergedrop.debug();
+    check(typeof dbg.score === 'number' && typeof dbg.merges === 'number', 'debug() exposes score/merges');
+  }
+
   // ---- audio sequencer deep-check (notes parse & schedule without throwing) ----
   console.log('[audio]');
   {
     let ok = true;
     try {
-      for (const song of ['menu', 'runner', 'jumper', 'shooter', 'racing', 'rpg', 'worm', 'blockfall', 'brickbreak', 'flappy', 'stackup', 'snake', 'pong']) {
+      for (const song of ['menu', 'runner', 'jumper', 'shooter', 'racing', 'rpg', 'worm', 'blockfall', 'brickbreak', 'flappy', 'stackup', 'snake', 'pong', 'mergedrop']) {
         RA.audio.playBGM(song);
         await new Promise(res => setTimeout(res, 120));   // let sequencer tick
         RA.audio.stopBGM();
       }
     } catch (e) { ok = false; console.error(e); }
-    check(ok, 'all 13 BGM tracks schedule without throwing');
+    check(ok, 'all 14 BGM tracks schedule without throwing');
 
     let sfxOk = true;
     try { for (const k of Object.keys(RA.audio.sfx)) RA.audio.sfx[k](); } catch (e) { sfxOk = false; console.error(e); }
@@ -302,9 +321,46 @@ function drive(mod, seconds, opts = {}) {
     try {
       refreshLobby();
       const grid = elements['game-grid'];
-      check(grid.children.length === 12, `12 cards rendered (got ${grid.children.length})`);
+      check(grid.children.length === 13, `13 cards rendered (got ${grid.children.length})`);
+      check(elements['mission-list'].children.length === 3, `3 daily missions rendered (got ${elements['mission-list'].children.length})`);
+      check(elements['shop-grid'].children.length === 5, `5 skin items rendered (got ${elements['shop-grid'].children.length})`);
     } catch (e) { ok = false; console.error(e); }
     check(ok, 'refreshLobby executes');
+  }
+
+  // ---- meta layer: coins / missions / shop ----
+  console.log('[meta]');
+  {
+    // coin conversion on game end
+    const before = RA.meta.coins();
+    const earned = RA.meta.onGameEnd('blockfall', 2000);   // rate 0.10 → ~200¢
+    check(earned >= 150, `score→coin conversion works (+${earned}¢)`);
+    check(RA.meta.coins() === before + earned, 'coin balance credited');
+
+    // deterministic daily missions — same seed → same set
+    const m1 = RA.meta.missionsToday().map(m => m.id);
+    const m2 = RA.meta.missionsToday().map(m => m.id);
+    check(JSON.stringify(m1) === JSON.stringify(m2), 'daily missions stable within a day');
+    check(m1.length === 3, 'exactly 3 daily missions');
+
+    // mission progress via events
+    RA.meta.event('merge_count', 99);
+    const ms = RA.meta.missionsToday();
+    const mergeM = ms.find(m => m.stat === 'merge_count');
+    if (mergeM) check(mergeM.progress >= Math.min(25, 99), `merge mission progresses (${mergeM.progress}/${mergeM.goal})`);
+    else console.log('  SKIP merge mission not in today\'s pool');
+
+    // skin economy
+    const startCoins = RA.meta.coins();
+    const cheapSkin = RA.meta.skinList().find(s => s.cost > 0 && s.cost <= startCoins);
+    if (cheapSkin) {
+      check(RA.meta.buySkin(cheapSkin.id), `bought skin ${cheapSkin.name}`);
+      check(RA.meta.selectSkin(cheapSkin.id), `equipped skin ${cheapSkin.name}`);
+      check(RA.meta.currentSkin().id === cheapSkin.id, 'current skin switched');
+    } else {
+      check(!RA.meta.buySkin('gold'), 'cannot buy unaffordable skin');
+      console.log(`  SKIP affordable-skin flow (balance ${startCoins}¢ too low)`);
+    }
   }
 
   console.log(failures === 0 ? '\nALL TESTS PASSED ✔' : `\n${failures} FAILURES ✘`);
