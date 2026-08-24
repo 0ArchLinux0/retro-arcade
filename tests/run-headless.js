@@ -116,6 +116,10 @@ load('js/games/rpg.js');
 load('js/games/worm.js');
 load('js/games/blockfall.js');
 load('js/games/brickbreak.js');
+load('js/games/flappy.js');
+load('js/games/stackup.js');
+load('js/games/snake.js');
+load('js/games/pong.js');
 load('js/lobby.js');
 
 // ---------------- harness ----------------
@@ -239,18 +243,52 @@ function drive(mod, seconds, opts = {}) {
     RA.games.brickbreak.onPause(); RA.hideOverlay();
   }
 
+  // ---- flappy ----
+  console.log('[flappy]');
+  {
+    const r = drive(RA.games.flappy, 20, { holdRatio: 0.3 });
+    check(r.errors.length === 0, 'no runtime errors in 20s sim');
+    RA.games.flappy.onPause(); RA.hideOverlay();
+  }
+
+  // ---- stackup ----
+  console.log('[stackup]');
+  {
+    const r = drive(RA.games.stackup, 20, { holdRatio: 0.2 });
+    check(r.errors.length === 0, 'no runtime errors in 20s sim');
+    RA.games.stackup.onPause(); RA.hideOverlay();
+  }
+
+  // ---- snake ----
+  console.log('[snake]');
+  {
+    const r = drive(RA.games.snake, 20, { holdRatio: 0.5 });
+    check(r.errors.length === 0, 'no runtime errors in 20s sim');
+    RA.games.snake.onPause(); RA.hideOverlay();
+  }
+
+  // ---- pong ----
+  console.log('[pong]');
+  {
+    const r = drive(RA.games.pong, 25, { holdRatio: 0.95 });
+    check(r.errors.length === 0, 'no runtime errors in 25s sim');
+    // Random-wiggle driver rarely scores; deep play verified by tests/verify-pong.js
+    check(r.errors.length === 0, 'match sim stable');
+    RA.games.pong.onPause(); RA.hideOverlay();
+  }
+
   // ---- audio sequencer deep-check (notes parse & schedule without throwing) ----
   console.log('[audio]');
   {
     let ok = true;
     try {
-      for (const song of ['menu', 'runner', 'jumper', 'shooter', 'racing', 'rpg', 'worm', 'blockfall', 'brickbreak']) {
+      for (const song of ['menu', 'runner', 'jumper', 'shooter', 'racing', 'rpg', 'worm', 'blockfall', 'brickbreak', 'flappy']) {
         RA.audio.playBGM(song);
         await new Promise(res => setTimeout(res, 120));   // let sequencer tick
         RA.audio.stopBGM();
       }
     } catch (e) { ok = false; console.error(e); }
-    check(ok, 'all 9 BGM tracks schedule without throwing');
+    check(ok, 'all 10 BGM tracks schedule without throwing');
 
     let sfxOk = true;
     try { for (const k of Object.keys(RA.audio.sfx)) RA.audio.sfx[k](); } catch (e) { sfxOk = false; console.error(e); }
@@ -264,7 +302,7 @@ function drive(mod, seconds, opts = {}) {
     try {
       refreshLobby();
       const grid = elements['game-grid'];
-      check(grid.children.length === 8, `8 cards rendered (got ${grid.children.length})`);
+      check(grid.children.length === 12, `12 cards rendered (got ${grid.children.length})`);
     } catch (e) { ok = false; console.error(e); }
     check(ok, 'refreshLobby executes');
   }

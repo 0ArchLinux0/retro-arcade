@@ -21,11 +21,30 @@ const RA = (() => {
     canvas.style.height = cssH + 'px';
     canvas.width = Math.floor(cssW * dpr);
     canvas.height = Math.floor(cssH * dpr);
-    offX = canvas.offsetLeft; offY = canvas.offsetTop;
+    // Viewport-relative offset (works even when the stage is letterboxed
+    // inside a wide desktop window). Skip while the canvas is display:none.
+    if (canvas.offsetWidth > 0) {
+      const r = canvas.getBoundingClientRect
+        ? canvas.getBoundingClientRect()
+        : { left: 0, top: 0, right: window.innerWidth };
+      offX = r.left; offY = r.top;
+      // Align the HUD bar and BOOST button to the stage, not the window.
+      const hud = document.getElementById('hud');
+      if (hud && hud.style) {
+        hud.style.left = Math.round(r.left) + 'px';
+        hud.style.width = cssW + 'px';
+        hud.style.right = 'auto';
+      }
+      const boost = document.getElementById('btn-boost');
+      if (boost && boost.style) {
+        boost.style.right = Math.max(12, Math.round(window.innerWidth - r.right + 18)) + 'px';
+      }
+    }
     ctx.setTransform(dpr * scale, 0, 0, dpr * scale, 0, 0);
     ctx.imageSmoothingEnabled = false;
   }
   window.addEventListener('resize', resize);
+  window.addEventListener('orientationchange', resize);
 
   function toVirtual(clientX, clientY) {
     return { x: (clientX - offX) / scale, y: (clientY - offY) / scale };
@@ -155,6 +174,7 @@ const RA = (() => {
     game = mod;
     clearParticles();
     showGameUI(true);
+    resize();   // re-measure now that the canvas is visible
     try { mod.init && mod.init(); } catch (err) { console.error(err); }
     lastT = performance.now();
     rafId = requestAnimationFrame(loop);

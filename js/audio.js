@@ -255,6 +255,22 @@ RA.audio = (() => {
         'KhhSKhhKKhhSKhKS',
         'KhhSKhhKKhhSShKS'
       ]
+    },
+    flappy: {
+      tempo: 126,
+      bars: 2,
+      lead: [
+        'G5 -- E5 -- C5 -- E5 -- G5 -- A5 -- G5 E5 D5 -- C5 --',
+        'E5 -- C5 -- G4 -- C5 -- F5 -- G5 -- F5 D5 E5 -- C5 --'
+      ],
+      bass: [
+        'C3 -- C3 C3 G2 -- G2 G2 A2 -- A2 A2 F2 -- G2 G2',
+        'A2 -- A2 A2 E2 -- E2 E2 F2 -- F2 F2 G2 -- G2 G2'
+      ],
+      drums: [
+        'KhShhKhSKhShhKhS',
+        'KhShhKhSKhSShSKS'
+      ]
     }
   };
 

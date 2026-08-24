@@ -147,7 +147,9 @@ canvas#game {
 
 #hud {
   position: fixed;
-  top: 0; left: 0; right: 0;
+  top: 0;
+  left: 0;
+  width: 100%;
   height: 48px;
   display: flex;
   align-items: center;
@@ -245,4 +247,17 @@ canvas#game {
 
 @media (min-width: 700px) and (pointer: fine) {
   #game-grid { grid-template-columns: repeat(3, 1fr); }
+  #game-grid { width: min(760px, 100%); max-height: calc(100vh - 220px); }
+}
+
+/* Wide desktop: keep the stage centered with an arcade-cabinet vibe */
+@media (min-aspect-ratio: 5/4) {
+  #screen-game {
+    background:
+      radial-gradient(80% 100% at 50% 0%, rgba(42,10,74,.55), transparent 70%),
+      radial-gradient(60% 90% at 50% 110%, rgba(7,34,58,.5), transparent 65%),
+      repeating-linear-gradient(45deg, #0d0620 0 14px, #0a0418 14px 28px);
+    border-left: 1px solid rgba(0,234,255,.12);
+    border-right: 1px solid rgba(0,234,255,.12);
+  }
 }
