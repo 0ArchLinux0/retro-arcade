@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0a0018">
+  <title>RETRO ARCADE — 레트로 아케이드</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ===== LOBBY ===== -->
+  <div id="screen-lobby" class="screen active">
+    <header class="lobby-head">
+      <h1 class="logo">RETRO<span>ARCADE</span></h1>
+      <p class="tagline">13 GAMES · INSERT COIN ▮</p>
+      <div class="head-btns">
+        <span id="coin-count" class="coin-badge" title="보유 코인">0¢</span>
+        <button id="btn-mute" class="mute-btn" title="사운드 켜기/끄기">♪ ON</button>
+      </div>
+    </header>
+    <main id="game-grid"></main>
+    <section id="meta-panels">
+      <div class="panel-col">
+        <h2 class="panel-title">DAILY MISSIONS <span class="panel-reset-hint">매일 자정 리셋</span></h2>
+        <div id="mission-list"></div>
+      </div>
+      <div class="panel-col">
+        <h2 class="panel-title">SKIN SHOP</h2>
+        <div id="shop-grid"></div>
+      </div>
+    </section>
+    <footer class="lobby-foot">© 2026 RETRO ARCADE · MADE WITH ♥ &amp; CANVAS</footer>
+  </div>
+
+  <!-- ===== GAME ===== -->
+  <div id="screen-game" class="screen">
+    <div id="hud">
+      <button id="btn-exit" aria-label="exit">✕</button>
+      <div id="hud-center">
+        <span id="hud-title">GAME</span>
+        <span id="hud-score">000000</span>
+        <span id="hud-best">BEST 000000</span>
+      </div>
+      <button id="btn-pause" aria-label="pause">❚❚</button>
+    </div>
+    <canvas id="game"></canvas>
+    <button id="btn-boost" class="boost-btn hidden">BOOST</button>
+    <div id="overlay"></div>
+  </div>
+
+  <script src="js/core.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/meta.js"></script>
+  <script src="js/games/runner.js"></script>
+  <script src="js/games/jumper.js"></script>
+  <script src="js/games/shooter.js"></script>
+  <script src="js/games/racing.js"></script>
+  <script src="js/games/rpg.js"></script>
+  <script src="js/games/worm.js"></script>
+  <script src="js/games/blockfall.js"></script>
+  <script src="js/games/brickbreak.js"></script>
+  <script src="js/games/flappy.js"></script>
+  <script src="js/games/stackup.js"></script>
+  <script src="js/games/snake.js"></script>
+  <script src="js/games/pong.js"></script>
+  <script src="js/games/mergedrop.js"></script>
+  <script src="js/lobby.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+    }
+
+    // wire worm boost button
+    (function () {
+      const btn = document.getElementById('btn-boost');
+      const on = e => { e.preventDefault(); btn.classList.add('pressing'); RA.games.worm && RA.games.worm.setBoost(true); };
+      const off = () => { btn.classList.remove('pressing'); RA.games.worm && RA.games.worm.setBoost(false); };
+      btn.addEventListener('touchstart', on, { passive: false });
+      btn.addEventListener('touchend', off);
+      btn.addEventListener('touchcancel', off);
+      btn.addEventListener('mousedown', on);
+      window.addEventListener('mouseup', off);
+
+      // show boost button only in worm game
+      const obs = new MutationObserver(() => {
+        const title = document.getElementById('hud-title').textContent;
+        btn.classList.toggle('hidden', title !== 'WORM.IO');
+      });
+      obs.observe(document.getElementById('hud-title'), { childList: true });
+
+      // mute toggle
+      let muted = localStorage.getItem('ra_muted') === '1';
+      const muteBtn = document.getElementById('btn-mute');
+      function applyMute() {
+        muteBtn.textContent = muted ? '♪ OFF' : '♪ ON';
+        muteBtn.classList.toggle('muted', muted);
+        if (RA.audio.setMusicVol) {
+          RA.audio.setMusicVol(muted ? 0 : 0.5);
+          RA.audio.setSfxVol(muted ? 0 : 0.9);
+        }
+      }
+      muteBtn.addEventListener('click', () => {
+        muted = !muted;
+        localStorage.setItem('ra_muted', muted ? '1' : '0');
+        applyMute();
+      });
+      applyMute();
+    })();
+  </script>
+</body>
+</html>

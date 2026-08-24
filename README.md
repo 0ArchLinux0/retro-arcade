@@ -29,6 +29,14 @@
 
 ## 실행
 
+**지금 바로 플레이 (GitHub Pages 공개 배포):**
+
+```
+https://0archlinux0.github.io/retro-arcade/
+```
+
+로컬에서 실행:
+
 아무 정적 서버나 사용:
 
 ```bash
@@ -83,15 +91,20 @@ node tests/verify-race.js        # 비례 조향 드라이버로 실제 3랩 완
 ./debug-monitor.sh  # 리소스 모니터: CPU/메모리/프로세스 (2초마다 갱신)
 ```
 
-## 앱으로 출시하기 (선택)
+## 앱으로 출시하기
 
-같은 코드를 Capacitor로 감싸면 App Store / Google Play 출시 가능:
+스토어 등록 절차·리스팅 텍스트·체크리스트는 [LAUNCH.md](LAUNCH.md) 참고.
+
+- **PWA**: ✅ 배포됨 (위 링크, 홈 화면 추가 시 오프라인 실행)
+- **Android**: `android/` 프로젝트 준비 완료 — `./gradlew bundleRelease`로 AAB 빌드
+- **iOS**: `ios/` 프로젝트 생성 완료 — Xcode 설치 후 `npx cap sync ios` 재실행
+
+빠른 명령:
 
 ```bash
-npm i -D @capacitor/cli && npm i @capacitor/core @capacitor/ios @capacitor/android
-npx cap init "Retro Arcade" com.example.retroarcade --web-dir=.
-npx cap add ios && npx cap add android
-npx cap open ios   # Xcode에서 서명 후 업로드
+./make-www.sh && npx cap sync      # 웹에셋 → 네이티브 동기화
+npx cap open android               # Android Studio
+npx cap open ios                   # Xcode
 ```
 
 ## 구조

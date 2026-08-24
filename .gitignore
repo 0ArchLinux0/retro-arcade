@@ -1,3 +1,10 @@
-.DS_Store
 node_modules/
-*.log
+ios/App/Pods/
+ios/App/output/
+ios/DerivedData/
+android/.gradle/
+android/app/build/
+android/build/
+android/local.properties
+*.xcworkspace/xcuserdata/
+.DS_Store

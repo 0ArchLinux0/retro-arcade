@@ -51,4 +51,5 @@
 - ~~**v1.1**: BLOCK FALL + BRICK BREAK → "고전 명작" 정체성 완성~~ ✅
 - ~~**v1.2**: FLAPPY WING + STACK UP + SNAKE CLASSIC + PONG DUEL (+ BGM 13종 완성, 드럼 파싱 수정, AI 실책, ?auto=)~~ ✅
 - ~~**v1.3**: MERGE DROP + 메타 레이어(코인/일일미션/스킨상점)~~ ✅ (+BGM 14종)
-- **v2.0**: Capacitor 네이티브 래핑 + 스토어 출시 준비 (아이콘/스크린샷/개인정보처리방침)
+- **v2.0 출시 준비 (진행중)**: ✅ PWA 공개 배포 · ✅ 아이콘/스크린샷/방침 · ✅ Capacitor Android/iOS 스캐폴딩 → 남은 것: Play Console 가입+심사 제출, Xcode 설치 후 iOS 빌드
+- 상세 절차는 [LAUNCH.md](LAUNCH.md)

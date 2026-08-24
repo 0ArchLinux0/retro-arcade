@@ -1,0 +1,16 @@
+{
+  "appId": "com.retroarcade.game",
+  "appName": "Retro Arcade",
+  "webDir": "www",
+  "ios": {
+    "contentInset": "always",
+    "backgroundColor": "#0a0018"
+  },
+  "android": {
+    "backgroundColor": "#0a0018",
+    "allowMixedContent": false
+  },
+  "server": {
+    "androidScheme": "https"
+  }
+}
