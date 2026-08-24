@@ -16,7 +16,9 @@ const GAMES = [
   { id: 'stackup',  title: 'STACK UP',     desc: '타워 쌓기 · PERFECT 콤보',     mod: 'stackup',  hue: '#b967ff', icon: '▤' },
   { id: 'snake',    title: 'SNAKE CLASSIC', desc: '그리드 스네이크 · 성장',      mod: 'snake',    hue: '#7dff8a', icon: '⌗' },
   { id: 'pong',     title: 'PONG DUEL',    desc: 'AI 패들 대전 · 7점 선승',      mod: 'pong',     hue: '#00eaff', icon: '◉' },
-  { id: 'mergedrop', title: 'MERGE DROP',  desc: '숫자 드롭 머지 · 연쇄 콤보',   mod: 'mergedrop', hue: '#39ff14', icon: '⬢' }
+  { id: 'mergedrop', title: 'MERGE DROP',  desc: '숫자 드롭 머지 · 연쇄 콤보',   mod: 'mergedrop', hue: '#39ff14', icon: '⬢' },
+  { id: 'minesweeper', title: 'MINESWEEPER', desc: '지뢰찾기 · 안전 칸 개봉',    mod: 'minesweeper', hue: '#9aa7ff', icon: '💣' },
+  { id: 'dodge',    title: 'DODGE ROYALE', desc: '탄막 생존 · 그레이즈 보너스',  mod: 'dodge',    hue: '#ff66d9', icon: '✺' }
 ];
 
 function coinBadge() {
@@ -64,6 +66,7 @@ function refreshLobby() {
     if (coinBadge()) coinBadge().textContent = RA.meta.coins() + '¢';
     renderMissions();
     renderShop();
+    renderAchievements();
   }
 }
 
@@ -135,6 +138,35 @@ function renderShop() {
       refreshLobby();
     });
     wrap.appendChild(item);
+  }
+}
+
+// ---------- achievements panel ----------
+function renderAchievements() {
+  const wrap = document.getElementById('ach-list');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  for (const a of RA.meta.achievementList()) {
+    const unlocked = RA.meta.isUnlocked(a.id);
+    const row = document.createElement('div');
+    row.className = 'ach-row' + (unlocked ? ' done' : '');
+    const trophy = document.createElement('div');
+    trophy.className = 'ach-trophy';
+    trophy.textContent = unlocked ? '🏆' : '🔒';
+    const mid = document.createElement('div');
+    mid.className = 'ach-mid';
+    const name = document.createElement('div');
+    name.className = 'ach-name';
+    name.textContent = a.name;
+    const desc = document.createElement('div');
+    desc.className = 'ach-desc';
+    desc.textContent = a.desc;
+    mid.append(name, desc);
+    const right = document.createElement('div');
+    right.className = 'ach-right';
+    right.textContent = unlocked ? '+' + a.reward + '¢' : a.reward + '¢';
+    row.append(trophy, mid, right);
+    wrap.appendChild(row);
   }
 }
 

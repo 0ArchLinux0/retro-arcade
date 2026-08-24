@@ -37,6 +37,17 @@ RA.meta = (() => {
     { id: 'coins150', desc: '코인 150 획득', goal: 150, reward: 45, stat: 'coins_earned' }
   ];
 
+  // achievements — permanent, one-time unlocks with coin rewards
+  const ACHIEVEMENTS = [
+    { id: 'firstblood', name: 'FIRST BLOOD',   desc: '첫 게임 플레이',            reward: 20,  test: s => (s.lifetimePlays || 0) >= 1 },
+    { id: 'veteran',    name: 'VETERAN',       desc: '누적 50판 플레이',          reward: 100, test: s => (s.lifetimePlays || 0) >= 50 },
+    { id: 'allrounder', name: 'ALL-ROUNDER',   desc: '전체 게임 13종 이상 플레이', reward: 150, test: s => Object.keys(s.stats || {}).filter(k => k.startsWith('game_')).length >= 13 },
+    { id: 'rich',       name: 'HIGH ROLLER',   desc: '코인 누적 1000 획득',        reward: 80,  test: s => (s.totalEarned || 0) >= 1000 },
+    { id: 'fashionista',name: 'FASHIONISTA',   desc: '스킨 3종 이상 보유',         reward: 60,  test: s => (s.owned || []).length >= 3 },
+    { id: 'missionary', name: 'MISSIONARY',    desc: '일일 미션 10회 달성',        reward: 90,  test: s => (s.missionsDone || 0) >= 10 },
+    { id: 'bigspender', name: 'BIG SPENDER',   desc: '누적 코인 소모 800 이상',    reward: 70,  test: s => (s.spent || 0) >= 800 }
+  ];
+
   function todayKey() {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -71,7 +82,10 @@ RA.meta = (() => {
       dayKey,
       missions: pickMissions(dayKey),
       stats: {},
-      lifetimePlays: 0
+      lifetimePlays: 0,
+      missionsDone: 0,
+      spent: 0,
+      achievements: []
     };
   }
 
@@ -106,11 +120,13 @@ RA.meta = (() => {
     const sk = SKINS.find(s => s.id === id);
     if (!sk || isOwned(id) || state.coins < sk.cost) return false;
     state.coins -= sk.cost;
+    state.spent = (state.spent || 0) + sk.cost;
     state.owned.push(id);
     state.skin = id;
     applySkinCSS();
     dirty = true;
     scheduleSave();
+    checkAchievements();
     RA.audio.sfx.confirm();
     return true;
   }
@@ -155,7 +171,9 @@ RA.meta = (() => {
     const m = state.missions[idx];
     if (!m || m.claimed || m.progress < m.goal) return false;
     m.claimed = true;
+    state.missionsDone = (state.missionsDone || 0) + 1;
     addCoins(m.reward);
+    checkAchievements();
     RA.audio.sfx.levelup();
     dirty = true;
     scheduleSave();
@@ -178,10 +196,31 @@ RA.meta = (() => {
     event(`game_${gameId}`, 1);
     if (score >= 1000) event('big_score', 1);
     if (earned > 0) addCoins(earned);
+    checkAchievements();
     dirty = true;
     scheduleSave();
     return earned;
   }
+
+  // ---------- achievements ----------
+  function checkAchievements() {
+    for (const a of ACHIEVEMENTS) {
+      if (!state.achievements.includes(a.id) && a.test(state)) {
+        state.achievements.push(a.id);
+        state.coins += a.reward;
+        state.totalEarned += a.reward;
+        RA.audio.sfx.powerup();
+        if (RA.floatText && RA.isOverlayOpen && !RA.isOverlayOpen()) {
+          RA.floatText(RA.VW / 2, RA.VH * 0.16, `🏆 ${a.name} +${a.reward}¢`, '#ffd166');
+        }
+        dirty = true;
+      }
+    }
+    scheduleSave();
+  }
+
+  function achievementList() { return ACHIEVEMENTS; }
+  function isUnlocked(id) { return state.achievements.includes(id); }
 
   function missionsToday() {
     if (state.dayKey !== todayKey()) {
@@ -199,6 +238,7 @@ RA.meta = (() => {
   return {
     coins, addCoins, onGameEnd, event, missionsToday, claimMission,
     skinList, currentSkin, isOwned, buySkin, selectSkin, applySkinCSS,
+    achievementList, isUnlocked,
     debugState
   };
 })();

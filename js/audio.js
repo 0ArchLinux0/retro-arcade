@@ -335,6 +335,38 @@ RA.audio = (() => {
         'KhKhShKhKhKhShKS',
         'KhKhShKhSShKShKS'
       ]
+    },
+    minesweeper: {
+      tempo: 108,
+      bars: 2,
+      lead: [
+        'A4 -- C5 -- E5 -- D5 -- C5 -- B4 -- A4 -- E4 ----',
+        'A4 -- C5 -- F5 -- E5 -- D5 -- B4 -- G#4 -- A4 ----'
+      ],
+      bass: [
+        'A2 -- A2 -- E2 -- E2 -- F2 -- F2 -- E2 -- E2 --',
+        'F2 -- F2 -- D2 -- D2 -- E2 -- E2 -- A2 -- A2 --'
+      ],
+      drums: [
+        'K h h S h h K h K h h S h h S h',
+        'K h h S h h K h K h S h S h K S'
+      ]
+    },
+    dodge: {
+      tempo: 156,
+      bars: 2,
+      lead: [
+        'D5 F5 A5 F5 D5 F5 A5 F5 C5 E5 G5 E5 C5 E5 G5 E5',
+        'B4 D5 F5 D5 B4 D5 F5 D5 A4 C5 E5 C5 A4 C5 E5 G5'
+      ],
+      bass: [
+        'D2 D3 D2 D3 C2 C3 C2 C3 B1 B2 B1 B2 A1 A2 A1 A2',
+        'G2 G3 G2 G3 F2 F3 F2 F3 E2 E3 E2 E3 A2 A3 A2 A3'
+      ],
+      drums: [
+        'KhhSKhhSKhhSKhhS',
+        'KhhSKhhSKhhSShKS'
+      ]
     }
   };
 

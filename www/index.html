@@ -21,7 +21,7 @@
   <div id="screen-lobby" class="screen active">
     <header class="lobby-head">
       <h1 class="logo">RETRO<span>ARCADE</span></h1>
-      <p class="tagline">13 GAMES · INSERT COIN ▮</p>
+      <p class="tagline">15 GAMES · INSERT COIN ▮</p>
       <div class="head-btns">
         <span id="coin-count" class="coin-badge" title="보유 코인">0¢</span>
         <button id="btn-mute" class="mute-btn" title="사운드 켜기/끄기">♪ ON</button>
@@ -32,6 +32,8 @@
       <div class="panel-col">
         <h2 class="panel-title">DAILY MISSIONS <span class="panel-reset-hint">매일 자정 리셋</span></h2>
         <div id="mission-list"></div>
+        <h2 class="panel-title" style="margin-top:22px">ACHIEVEMENTS <span class="panel-reset-hint">영구 업적</span></h2>
+        <div id="ach-list"></div>
       </div>
       <div class="panel-col">
         <h2 class="panel-title">SKIN SHOP</h2>
@@ -73,6 +75,8 @@
   <script src="js/games/snake.js"></script>
   <script src="js/games/pong.js"></script>
   <script src="js/games/mergedrop.js"></script>
+  <script src="js/games/minesweeper.js"></script>
+  <script src="js/games/dodge.js"></script>
   <script src="js/lobby.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

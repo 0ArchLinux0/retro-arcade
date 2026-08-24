@@ -47,7 +47,7 @@ RA.audio.unlock();
   // Deterministic check: run the sequencer long enough that every step fires.
   // At 100+ BPM, 16th ≈ 90–150ms; 1.3s covers ≥ one full 32-step loop for all songs.
   const results = {};
-  for (const song of ['menu','runner','jumper','shooter','racing','rpg','worm','blockfall','brickbreak','flappy','stackup','snake','pong']) {
+  for (const song of ['menu','runner','jumper','shooter','racing','rpg','worm','blockfall','brickbreak','flappy','stackup','snake','pong','mergedrop','minesweeper','dodge']) {
     drumHits = noiseCalls = kickCalls = 0;
     RA.audio.playBGM(song);
     await new Promise(r => setTimeout(r, 1300));

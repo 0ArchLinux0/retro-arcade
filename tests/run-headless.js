@@ -45,7 +45,7 @@ const ctxStub = new Proxy(ctxProxyTarget, {
 const elements = {};
 ['game', 'hud', 'hud-title', 'hud-score', 'hud-best', 'btn-pause', 'btn-exit',
  'overlay', 'screen-game', 'screen-lobby', 'game-grid', 'coin-count',
- 'mission-list', 'shop-grid'].forEach(id => elements[id] = mkEl('div'));
+ 'mission-list', 'shop-grid', 'ach-list'].forEach(id => elements[id] = mkEl('div'));
 elements['game'] = mkEl('canvas');
 
 global.document = {
@@ -124,6 +124,8 @@ load('js/games/stackup.js');
 load('js/games/snake.js');
 load('js/games/pong.js');
 load('js/games/mergedrop.js');
+load('js/games/minesweeper.js');
+load('js/games/dodge.js');
 load('js/lobby.js');
 
 // ---------------- harness ----------------
@@ -296,18 +298,37 @@ function drive(mod, seconds, opts = {}) {
     check(typeof dbg.score === 'number' && typeof dbg.merges === 'number', 'debug() exposes score/merges');
   }
 
+  // ---- minesweeper (deterministic gameplay driver) ----
+  console.log('[minesweeper]');
+  {
+    const r = drive(RA.games.minesweeper, 10, { tapEvery: 40 });
+    check(r.errors.length === 0, 'no runtime errors in 10s sim');
+    RA.games.minesweeper.onPause(); RA.hideOverlay();
+    const d = RA.meta.debugState();
+    check(Object.keys(d.stats).some(k => k.startsWith('game_minesweeper')) || d.lifetimePlays >= 1, 'meta recorded session');
+  }
+
+  // ---- dodge (survival sim) ----
+  console.log('[dodge]');
+  {
+    const r = drive(RA.games.dodge, 15, { holdRatio: 0.9 });
+    check(r.errors.length === 0, 'no runtime errors in 15s sim');
+    check(r.scores.some(v => v > 0), `score progressed (max=${Math.max(0, ...r.scores)})`);
+    RA.games.dodge.onPause(); RA.hideOverlay();
+  }
+
   // ---- audio sequencer deep-check (notes parse & schedule without throwing) ----
   console.log('[audio]');
   {
     let ok = true;
     try {
-      for (const song of ['menu', 'runner', 'jumper', 'shooter', 'racing', 'rpg', 'worm', 'blockfall', 'brickbreak', 'flappy', 'stackup', 'snake', 'pong', 'mergedrop']) {
+      for (const song of ['menu', 'runner', 'jumper', 'shooter', 'racing', 'rpg', 'worm', 'blockfall', 'brickbreak', 'flappy', 'stackup', 'snake', 'pong', 'mergedrop', 'minesweeper', 'dodge']) {
         RA.audio.playBGM(song);
         await new Promise(res => setTimeout(res, 120));   // let sequencer tick
         RA.audio.stopBGM();
       }
     } catch (e) { ok = false; console.error(e); }
-    check(ok, 'all 14 BGM tracks schedule without throwing');
+    check(ok, 'all 16 BGM tracks schedule without throwing');
 
     let sfxOk = true;
     try { for (const k of Object.keys(RA.audio.sfx)) RA.audio.sfx[k](); } catch (e) { sfxOk = false; console.error(e); }
@@ -321,9 +342,10 @@ function drive(mod, seconds, opts = {}) {
     try {
       refreshLobby();
       const grid = elements['game-grid'];
-      check(grid.children.length === 13, `13 cards rendered (got ${grid.children.length})`);
+      check(grid.children.length === 15, `15 cards rendered (got ${grid.children.length})`);
       check(elements['mission-list'].children.length === 3, `3 daily missions rendered (got ${elements['mission-list'].children.length})`);
       check(elements['shop-grid'].children.length === 5, `5 skin items rendered (got ${elements['shop-grid'].children.length})`);
+      check(elements['ach-list'].children.length === RA.meta.achievementList().length, `achievements rendered (got ${elements['ach-list'].children.length})`);
     } catch (e) { ok = false; console.error(e); }
     check(ok, 'refreshLobby executes');
   }
@@ -361,6 +383,14 @@ function drive(mod, seconds, opts = {}) {
       check(!RA.meta.buySkin('gold'), 'cannot buy unaffordable skin');
       console.log(`  SKIP affordable-skin flow (balance ${startCoins}¢ too low)`);
     }
+
+    // achievements: firstblood must be unlocked by the play sessions above
+    check(RA.meta.isUnlocked('firstblood'), 'firstblood unlocked after first play');
+    const achCount = RA.meta.debugState().achievements.length;
+    check(achCount >= 1, `achievements recorded (${achCount} unlocked)`);
+    // forcing a fresh state predicate: veteran requires 50 plays
+    check(RA.meta.achievementList().find(a => a.id === 'veteran').test({ lifetimePlays: 50 }), 'veteran predicate fires at 50 plays');
+    check(typeof RA.meta.achievementList()[0].test === 'function', 'achievement list exposes test predicates');
   }
 
   console.log(failures === 0 ? '\nALL TESTS PASSED ✔' : `\n${failures} FAILURES ✘`);

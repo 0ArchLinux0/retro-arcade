@@ -1,7 +1,7 @@
 {
   "name": "Retro Arcade — 레트로 아케이드",
   "short_name": "RetroArcade",
-  "description": "고전 아케이드 감성의 13종 게임 팩 + 코인/일일미션/스킨 메타 레이어 — 러너, 점프, 슈팅, 레이싱, RPG, io웜, 테트리스, 벽돌깨기, 플래피, 타워쌓기, 스네이크, 퐁, 머지퍼즐",
+  "description": "고전 아케이드 감성의 15종 게임 팩 + 코인/일일미션/업적/스킨 메타 레이어 — 러너, 점프, 슈팅, 레이싱, RPG, io웜, 테트리스, 벽돌깨기, 플래피, 타워쌓기, 스네이크, 퐁, 머지퍼즐, 지뢰찾기, 탄막",
   "start_url": "./index.html",
   "scope": "./",
   "display": "fullscreen",
