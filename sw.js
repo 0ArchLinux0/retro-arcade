@@ -1,5 +1,5 @@
 // Retro Arcade — minimal offline-first service worker
-const CACHE = 'ra-v6';
+const CACHE = 'ra-v7';
 const ASSETS = [
   './',
   './index.html',
@@ -43,12 +43,24 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
-  // Google Fonts: cache-first too (fine for this use)
+  const url = new URL(e.request.url);
+  // Fonts: cache-first (immutable enough for this use).
+  // Everything else: NETWORK-FIRST so deploys reach clients immediately;
+  // cache is the offline fallback, never the source of truth.
+  if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') {
+    e.respondWith(
+      caches.match(e.request).then(hit => hit || fetch(e.request))
+    );
+    return;
+  }
   e.respondWith(
-    caches.match(e.request).then(hit => hit || fetch(e.request).then(res => {
+    fetch(e.request).then(res => {
       const copy = res.clone();
       caches.open(CACHE).then(c => c.put(e.request, copy)).catch(() => {});
       return res;
-    }).catch(() => caches.match('./index.html')))
+    }).catch(() =>
+      caches.match(e.request).then(hit =>
+        hit || caches.match('./index.html'))
+    )
   );
 });
