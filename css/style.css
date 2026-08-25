@@ -53,6 +53,20 @@ body::after {
     var(--bg);
 }
 
+/* Mobile: the whole lobby scrolls (games first, meta panels below).
+   touch-action:none on body kills page scroll, so re-enable it here —
+   otherwise short screens can't reach the panels at all. */
+@media (max-width: 699px), (pointer: coarse) {
+  #screen-lobby {
+    display: block;
+    height: auto;
+    min-height: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+  }
+}
+
 .lobby-head {
   width: min(480px, 100%);
   text-align: center;
@@ -111,6 +125,10 @@ body::after {
   flex: 1;
   align-content: start;
 }
+@media (max-width: 699px), (pointer: coarse) {
+  /* page scrolls as a whole on mobile — the grid must size to its content */
+  #game-grid { overflow: visible; flex: none; }
+}
 
 .card {
   display: flex;
@@ -159,6 +177,15 @@ body::after {
 }
 @media (min-width: 700px) and (pointer: fine) {
   #meta-panels { width: min(760px, 100%); }
+}
+@media (max-width: 699px), (pointer: coarse) {
+  /* single column, full width — panels live BELOW the game grid and the
+     page scrolls to them; no fixed heights that could cover the grid */
+  #meta-panels {
+    width: 100%;
+    grid-template-columns: 1fr;
+    margin-top: 14px;
+  }
 }
 .panel-title {
   font-size: 8px;
