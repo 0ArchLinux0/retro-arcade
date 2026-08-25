@@ -66,12 +66,18 @@ console.log('[minesweeper deep]');
   }
   check(adjSane, 'adjacency counts within bounds');
 
-  // flag toggling
+  // flag toggling — pick a guaranteed-hidden cell
+  let hr = -1, hc = -1;
+  outerFlag:
+  for (let r = 0; r < d.ROWS; r++) for (let c = 0; c < d.COLS; c++) {
+    if (d.grid[r][c].state === 0) { hr = r; hc = c; break outerFlag; }
+  }
+  check(hr >= 0, 'a hidden cell exists for flag test');
   const beforeFlags = d.flags;
-  d.toggleFlag(5, 5);
-  check(d.grid[5][5].state === 2 && d.flags === beforeFlags + 1, 'flag placed');
-  d.toggleFlag(5, 5);
-  check(d.grid[5][5].state === 0 && d.flags === beforeFlags, 'flag removed');
+  d.toggleFlag(hr, hc);
+  check(d.grid[hr][hc].state === 2 && d.flags === beforeFlags + 1, 'flag placed');
+  d.toggleFlag(hr, hc);
+  check(d.grid[hr][hc].state === 0 && d.flags === beforeFlags, 'flag removed');
 
   // chord on revealed number with no flags must not explode hidden cells silently
   d.chord(10, 0);

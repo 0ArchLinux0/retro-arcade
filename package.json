@@ -1,6 +1,6 @@
 {
   "name": "retro-arcade",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "private": true,
   "description": "고전 아케이드 감성의 13종 게임 팩 (PWA + Capacitor 네이티브)",
   "scripts": {
