@@ -19,6 +19,7 @@ RA.games.jumper = (() => {
   let player, plats, coins, camY, height, score, dead, started;
   let stars, springTimer, comboCount, comboTimer;
   const PLAT_W = 64, PLAT_H = 14;
+  const CAM_Y = VH / 2 - 90;   // camera triggers when player rises above this line
 
   function init() {
     RA.setHUD('SKY HOPPER', 'jumper');
@@ -112,9 +113,11 @@ RA.games.jumper = (() => {
         p.x += p.vx * dt;
         if (p.x <= 0 || p.x + p.w >= VW) p.vx *= -1;
       }
-      // landing check only when falling
+      // landing check only when falling; sweep the full fall distance so
+      // fast falls can't tunnel through a platform between frames
+      const fallSpan = player.vy * dt;
       if (player.vy > 0 &&
-          player.y + player.h >= p.y && player.y + player.h <= p.y + p.h + Math.max(10, player.vy * dt) &&
+          player.y + player.h >= p.y && player.y + player.h <= p.y + p.h + Math.max(10, fallSpan) &&
           player.x + player.w > p.x && player.x < p.x + p.w) {
 
         player.vy = BOUNCE_V;
@@ -162,16 +165,17 @@ RA.games.jumper = (() => {
       }
     }
 
-    // camera follows when rising
-    if (player.y < VH / 2 - 90) {
-      const dy = (VH / 2 - 90) - player.y;
-      player.y = VH / 2 - 90;
-      camY -= dy;
+    // camera follows when rising — move ONLY the camera, never the player,
+    // otherwise the two compensations cancel and the player drifts off-screen
+    if (player.y < CAM_Y) {
+      const dy = CAM_Y - player.y;
+      camY += dy;
       height += dy;
     }
 
-    // fall death
-    if (player.y > VH + 40) {
+    // fall death — judge in SCREEN coords: with the camera high up, world-y
+    // alone never exceeds the threshold and the player falls forever off-screen
+    if (player.y + camY > VH + 40) {
       die();
       return;
     }
@@ -235,9 +239,8 @@ RA.games.jumper = (() => {
     g.beginPath(); g.arc(VW - 42, 76, 22, 0, Math.PI * 2); g.fill();
     g.globalAlpha = 1;
 
-    const oy = -(-camY); // world -> screen offset: screenY = worldY + camY... careful:
-    // We store plat.y in "world" coords where larger negative = higher.
-    // Camera: screenY = p.y + offY where offY = camY (camY decreases as we climb)
+    // world -> screen offset. camY is NEGATIVE once we climb (world is
+    // shifted up), so screenY = worldY + offY with offY = camY.
     const offY = camY;
 
     // clouds decor
@@ -320,5 +323,17 @@ RA.games.jumper = (() => {
     }, 250);
   }
 
-  return { init, update, draw, onStart, onPause };
+  function debug() {
+    return {
+      get player() { return player; },
+      get plats() { return plats; },
+      get camY() { return camY; },
+      get height() { return height; },
+      get dead() { return dead; },
+      setVX(v) { player.vx = v; },
+      pump(frames) { const dt = 1 / 60; for (let i = 0; i < frames; i++) update(dt); }
+    };
+  }
+
+  return { init, update, draw, onStart, onPause, debug };
 })();
