@@ -67,6 +67,8 @@ function refreshLobby() {
     renderMissions();
     renderShop();
     renderAchievements();
+    renderBoosts();
+    renderRecords();
   }
 }
 
@@ -168,6 +170,78 @@ function renderAchievements() {
     row.append(trophy, mid, right);
     wrap.appendChild(row);
   }
+}
+
+// ---------- boost shop panel ----------
+function renderBoosts() {
+  const wrap = document.getElementById('boost-list');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  for (const b of RA.meta.boostList()) {
+    const owned = RA.meta.boostCount(b.id);
+    const item = document.createElement('button');
+    item.className = 'boost-item';
+    const top = document.createElement('div');
+    top.className = 'boost-top';
+    const name = document.createElement('div');
+    name.className = 'boost-name';
+    name.textContent = b.name;
+    if (owned > 0) {
+      const cnt = document.createElement('span');
+      cnt.className = 'boost-count';
+      cnt.textContent = `x${owned}`;
+      name.appendChild(cnt);
+    }
+    const price = document.createElement('div');
+    price.className = 'boost-price';
+    price.textContent = `${b.cost}¢`;
+    top.append(name, price);
+    const desc = document.createElement('div');
+    desc.className = 'boost-desc';
+    desc.textContent = b.desc;
+    item.append(top, desc);
+    item.addEventListener('click', () => {
+      if (!RA.meta.buyBoost(b.id)) RA.audio.sfx.hit();
+      refreshLobby();
+    });
+    wrap.appendChild(item);
+  }
+}
+
+// ---------- records panel ----------
+function renderRecords() {
+  const wrap = document.getElementById('records-grid');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  const scores = (() => {
+    try { return JSON.parse(localStorage.getItem('ra_scores_v1')) || {}; } catch { return {}; }
+  })();
+  // per-game bests, sorted desc
+  const rows = GAMES
+    .map(g => ({ title: g.title, best: scores[g.id]?.best || 0 }))
+    .sort((a, b) => b.best - a.best);
+  for (const r of rows.slice(0, 8)) {
+    const row = document.createElement('div');
+    row.className = 'rec-row' + (r.best > 0 ? '' : ' zero');
+    const t = document.createElement('div');
+    t.className = 'rec-title';
+    t.textContent = r.title;
+    const v = document.createElement('div');
+    v.className = 'rec-val';
+    v.textContent = r.best > 0 ? String(r.best).padStart(6, '0') : '——';
+    row.append(t, v);
+    wrap.appendChild(row);
+  }
+  // lifetime stats strip
+  const st = document.createElement('div');
+  st.className = 'rec-stats';
+  const m = RA.meta.debugState();
+  st.innerHTML =
+    `<span>플레이 <b>${m.lifetimePlays}</b>판</span>` +
+    `<span>누적 코인 <b>${m.totalEarned}¢</b></span>` +
+    `<span>미션 <b>${m.missionsDone || 0}</b>회</span>` +
+    `<span>업적 <b>${m.achievements.length}/${RA.meta.achievementList().length}</b></span>`;
+  wrap.appendChild(st);
 }
 
 function launch(gdef) {

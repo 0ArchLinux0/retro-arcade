@@ -18,6 +18,7 @@ RA.games.dodge = (() => {
   let time, score, started, over;
   let spawnT, waveT, shieldT, invT;
   let grazes, bestStreak, grazeStreak;
+  let shieldCharges;
 
   function reset() {
     px = VW / 2; py = VH * 0.72;
@@ -26,6 +27,8 @@ RA.games.dodge = (() => {
     started = false; over = false;
     spawnT = 0; waveT = 0; shieldT = 0; invT = 0;
     grazes = 0; bestStreak = 0; grazeStreak = 0;
+    // SHIELD boost: start with up to 3 auto-shields
+    shieldCharges = 0;
     RA.setScore(0);
   }
 
@@ -131,12 +134,13 @@ RA.games.dodge = (() => {
       const dist = Math.hypot(dx, dy);
       if (dist < b.r + PR) {
         if (invT > 0) continue;
-        if (hasShield()) {
-          invT = 1.2;
+        if (shieldCharges > 0) {
+          shieldCharges--;
+          invT = 1.5;
           bullets.splice(i, 1);
           sfx.hit();
           shake(5, 0.3);
-          floatText(px, py - 16, 'SHIELD!', '#00eaff');
+          floatText(px, py - 16, `SHIELD! (${shieldCharges} left)`, '#00eaff');
           burst(px, py, { n: 12, colors: ['#00eaff', '#fff'], speed: 160 });
           continue;
         }
@@ -226,6 +230,10 @@ RA.games.dodge = (() => {
     g.font = 'bold 9px monospace';
     g.fillText(`WAVE ${Math.floor(time / 15) + 1}   GRAZE ${grazes}   STREAK ${grazeStreak}`, 10, VH - 24);
     g.fillText(`TIME ${Math.floor(time)}s`, VW - 74, VH - 24);
+    if (shieldCharges > 0) {
+      g.fillStyle = '#00eaff';
+      g.fillText(`🛡 x${shieldCharges}`, VW - 74, VH - 38);
+    }
 
     if (!started && !over) {
       g.globalAlpha = 0.55 + Math.sin(performance.now() / 260) * 0.3;
@@ -252,6 +260,16 @@ RA.games.dodge = (() => {
   function onStart() {
     started = true;
     input.isDown = false;
+    // consume SHIELD boost at run start (up to 3 charges)
+    shieldCharges = 0;
+    if (RA.meta && RA.meta.consumeBoost) {
+      for (let i = 0; i < 3; i++) {
+        if (RA.meta.consumeBoost('shield')) shieldCharges++;
+      }
+    }
+    if (shieldCharges > 0 && RA.floatText) {
+      RA.floatText(VW / 2, VH * 0.3, `SHIELD x${shieldCharges}!`, '#00eaff');
+    }
     RA.audio.playBGM('dodge');
   }
   function onPause() {
@@ -277,6 +295,7 @@ RA.games.dodge = (() => {
       get over() { return over; },
       get grazes() { return grazes; },
       get playerPos() { return { x: px, y: py }; },
+      get shieldCharges() { return shieldCharges; },
       setPlayer(x, y) { px = x; py = y; input.x = x; input.y = y; },
       spawnWave,
       forceGameOver() { gameOver(); },

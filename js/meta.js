@@ -85,6 +85,8 @@ RA.meta = (() => {
       lifetimePlays: 0,
       missionsDone: 0,
       spent: 0,
+      boosts: {},
+      coinBoostUsed: 0,
       achievements: []
     };
   }
@@ -191,6 +193,12 @@ RA.meta = (() => {
     const rate = COIN_RATE[gameId] ?? 0.05;
     let earned = 0;
     if (score >= MIN_SCORE) earned = Math.max(1, Math.floor(score * rate));
+    // COIN x2 boost auto-consumes when a session earns coins
+    if (earned > 0 && consumeBoost('coinx2')) {
+      earned *= 2;
+      state.coinBoostUsed = (state.coinBoostUsed || 0) + 1;
+      event('boost_used', 1);
+    }
     state.lifetimePlays++;
     event('plays', 1);
     event(`game_${gameId}`, 1);
@@ -201,6 +209,38 @@ RA.meta = (() => {
     scheduleSave();
     return earned;
   }
+
+  // ---------- boost items (consumables, bought with coins) ----------
+  const BOOSTS = [
+    { id: 'coinx2',   name: 'COIN x2',     desc: '다음 게임 코인 2배',      cost: 60 },
+    { id: 'shield',   name: 'SHIELD',      desc: 'DODGE 시작 시 실드 3회', cost: 80 },
+    { id: 'magnet',   name: 'HEADSTART',   desc: '다음 게임 초반 부스트',   cost: 50 }
+  ];
+
+  function buyBoost(id) {
+    const b = BOOSTS.find(x => x.id === id);
+    if (!b || state.coins < b.cost) return false;
+    state.coins -= b.cost;
+    state.spent = (state.spent || 0) + b.cost;
+    state.boosts = state.boosts || {};
+    state.boosts[id] = (state.boosts[id] || 0) + 1;
+    dirty = true;
+    scheduleSave();
+    checkAchievements();
+    RA.audio.sfx.confirm();
+    return true;
+  }
+  // returns & decrements count if the player owns one (used by games/core)
+  function consumeBoost(id) {
+    state.boosts = state.boosts || {};
+    if (!state.boosts[id]) return false;
+    state.boosts[id]--;
+    dirty = true;
+    scheduleSave();
+    return true;
+  }
+  function boostCount(id) { return (state.boosts && state.boosts[id]) || 0; }
+  function boostList() { return BOOSTS; }
 
   // ---------- achievements ----------
   function checkAchievements() {
@@ -239,6 +279,7 @@ RA.meta = (() => {
     coins, addCoins, onGameEnd, event, missionsToday, claimMission,
     skinList, currentSkin, isOwned, buySkin, selectSkin, applySkinCSS,
     achievementList, isUnlocked,
+    boostList, buyBoost, consumeBoost, boostCount,
     debugState
   };
 })();

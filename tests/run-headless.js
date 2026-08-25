@@ -45,7 +45,7 @@ const ctxStub = new Proxy(ctxProxyTarget, {
 const elements = {};
 ['game', 'hud', 'hud-title', 'hud-score', 'hud-best', 'btn-pause', 'btn-exit',
  'overlay', 'screen-game', 'screen-lobby', 'game-grid', 'coin-count',
- 'mission-list', 'shop-grid', 'ach-list'].forEach(id => elements[id] = mkEl('div'));
+ 'mission-list', 'shop-grid', 'ach-list', 'boost-list', 'records-grid'].forEach(id => elements[id] = mkEl('div'));
 elements['game'] = mkEl('canvas');
 
 global.document = {
@@ -346,6 +346,8 @@ function drive(mod, seconds, opts = {}) {
       check(elements['mission-list'].children.length === 3, `3 daily missions rendered (got ${elements['mission-list'].children.length})`);
       check(elements['shop-grid'].children.length === 5, `5 skin items rendered (got ${elements['shop-grid'].children.length})`);
       check(elements['ach-list'].children.length === RA.meta.achievementList().length, `achievements rendered (got ${elements['ach-list'].children.length})`);
+      check(elements['boost-list'].children.length === RA.meta.boostList().length, `boost items rendered (got ${elements['boost-list'].children.length})`);
+      check(elements['records-grid'].children.length > 0, `records rendered (${elements['records-grid'].children.length} rows)`);
     } catch (e) { ok = false; console.error(e); }
     check(ok, 'refreshLobby executes');
   }
@@ -391,6 +393,27 @@ function drive(mod, seconds, opts = {}) {
     // forcing a fresh state predicate: veteran requires 50 plays
     check(RA.meta.achievementList().find(a => a.id === 'veteran').test({ lifetimePlays: 50 }), 'veteran predicate fires at 50 plays');
     check(typeof RA.meta.achievementList()[0].test === 'function', 'achievement list exposes test predicates');
+
+    // boost economy: buy COIN x2, next game end must double the payout
+    RA.meta.addCoins(500);
+    const coinsBeforeBoost = RA.meta.coins();
+    check(RA.meta.buyBoost('coinx2'), 'bought COIN x2 boost');
+    check(RA.meta.boostCount('coinx2') === 1, 'boost inventory incremented');
+    const earnedPlain = RA.meta.onGameEnd('snake', 1000);   // rate .08 → 80 → x2 = 160
+    check(earnedPlain === 160, `COIN x2 doubled payout (got ${earnedPlain}, want 160)`);
+    check(RA.meta.boostCount('coinx2') === 0, 'boost consumed after use');
+    void coinsBeforeBoost;
+
+    // SHIELD boost consumption in dodge onStart
+    RA.meta.addCoins(500);
+    check(RA.meta.buyBoost('shield') && RA.meta.buyBoost('shield'), 'bought 2 SHIELD boosts');
+    {
+      const g = RA.games.dodge;
+      g.init(); RA.hideOverlay(); g.onStart();
+      const d = g.debug();
+      check(d.shieldCharges === 2, `dodge consumed shield boosts (${d.shieldCharges})`);
+      RA.games.dodge.onPause(); RA.hideOverlay();
+    }
   }
 
   console.log(failures === 0 ? '\nALL TESTS PASSED ✔' : `\n${failures} FAILURES ✘`);
