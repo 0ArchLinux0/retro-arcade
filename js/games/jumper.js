@@ -143,11 +143,15 @@ RA.games.jumper = (() => {
       if (screenY > VH + 80) plats.splice(i, 1);
     }
 
-    // spawn new platforms above camera
-    while (highestY() > -camY - 120) {
-      plats.push(makePlatform(highestY() - 74 - Math.random() * 26));
+    // spawn new platforms above camera. If no platforms exist (everything
+    // culled below), highestY() is Infinity and the loop never terminates —
+    // seed from the player's screen position instead.
+    while (plats.length === 0 || highestY() > -camY - 120) {
+      const top = plats.length === 0 ? player.y : highestY();
+      if (top === Infinity) break;
+      plats.push(makePlatform(top - 74 - Math.random() * 26));
       if (Math.random() < 0.35) {
-        coins.push({ x: Math.random() * (VW - 30) + 15, y: highestY() - 40 });
+        coins.push({ x: Math.random() * (VW - 30) + 15, y: top - 40 });
       }
     }
 
@@ -165,10 +169,13 @@ RA.games.jumper = (() => {
       }
     }
 
-    // camera follows when rising — move ONLY the camera, never the player,
-    // otherwise the two compensations cancel and the player drifts off-screen
-    if (player.y < CAM_Y) {
-      const dy = CAM_Y - player.y;
+    // camera follows when rising — pin the player's SCREEN y (player.y + camY)
+    // to CAM_Y. Measure the shortfall ON SCREEN and compensate exactly that:
+    // this is idempotent. (Adding CAM_Y - player.y every frame compounded the
+    // correction each frame and shoved the player off the bottom of the screen.)
+    const sy = player.y + camY;
+    if (sy < CAM_Y) {
+      const dy = CAM_Y - sy;
       camY += dy;
       height += dy;
     }

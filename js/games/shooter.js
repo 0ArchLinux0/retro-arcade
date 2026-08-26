@@ -148,12 +148,17 @@ RA.games.shooter = (() => {
         // sinus drift + occasional dive at the player
         if (!e.diving && Math.random() < dt * 0.22 && waveState === 'fight') {
           e.diving = true;
-          e.dvx = (ship.x - e.x) * 0.9;
+          // capped homing velocity — uncapped (ship.x - e.x) * 0.9 let edge
+          // divers slide clean off-screen where bullets can never reach them
+          e.dvx = Math.max(-260, Math.min(260, (ship.x - e.x) * 0.9));
         }
         if (e.diving) {
           e.x += (e.dvx || 0) * dt;
           e.y += (240 + wave * 8) * dt;
           e.dvx *= (1 - 0.4 * dt);
+          // clamp inside the playfield so divers stay hittable
+          if (e.x < 16) { e.x = 16; e.dvx = Math.abs(e.dvx) * 0.5; }
+          if (e.x > VW - 16) { e.x = VW - 16; e.dvx = -Math.abs(e.dvx) * 0.5; }
           if (e.y > VH + 40) { enemies.splice(i, 1); continue; }
         } else {
           e.x += Math.sin(e.t * 1.8 + i) * 26 * dt;
