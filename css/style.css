@@ -44,6 +44,11 @@ body::after {
 }
 
 /* ---------- lobby ---------- */
+/* The lobby SCROLLS AS A PAGE on every viewport (desktop included). The old
+   fixed-height flex layout let the meta panels squeeze #game-grid down to a
+   sliver on short/wide windows (an overflow!=visible box loses its automatic
+   min-size, so flex happily shrank the grid to ~0 and the panels appeared to
+   cover the game cards). One scroll container kills that entire bug class. */
 #screen-lobby {
   align-items: center;
   padding: max(18px, env(safe-area-inset-top)) 16px calc(12px + env(safe-area-inset-bottom));
@@ -51,20 +56,9 @@ body::after {
     radial-gradient(120% 90% at 50% -10%, color-mix(in srgb, var(--pink) 22%, #2a0a4a) 0%, transparent 60%),
     radial-gradient(100% 80% at 50% 110%, color-mix(in srgb, var(--neon) 14%, #07223a) 0%, transparent 55%),
     var(--bg);
-}
-
-/* Mobile: the whole lobby scrolls (games first, meta panels below).
-   touch-action:none on body kills page scroll, so re-enable it here —
-   otherwise short screens can't reach the panels at all. */
-@media (max-width: 699px), (pointer: coarse) {
-  #screen-lobby {
-    display: block;
-    height: auto;
-    min-height: 100%;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    touch-action: pan-y;
-  }
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
 }
 
 .lobby-head {
@@ -120,14 +114,9 @@ body::after {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
   gap: 12px;
-  overflow-y: auto;
   padding: 4px 2px 10px;
-  flex: 1;
+  flex-shrink: 0;   /* never let the panels squeeze the game cards away */
   align-content: start;
-}
-@media (max-width: 699px), (pointer: coarse) {
-  /* page scrolls as a whole on mobile — the grid must size to its content */
-  #game-grid { overflow: visible; flex: none; }
 }
 
 .card {
@@ -177,15 +166,6 @@ body::after {
 }
 @media (min-width: 700px) and (pointer: fine) {
   #meta-panels { width: min(760px, 100%); }
-}
-@media (max-width: 699px), (pointer: coarse) {
-  /* single column, full width — panels live BELOW the game grid and the
-     page scrolls to them; no fixed heights that could cover the grid */
-  #meta-panels {
-    width: 100%;
-    grid-template-columns: 1fr;
-    margin-top: 14px;
-  }
 }
 .panel-title {
   font-size: 8px;
@@ -475,7 +455,7 @@ canvas#game {
 
 @media (min-width: 700px) and (pointer: fine) {
   #game-grid { grid-template-columns: repeat(3, 1fr); }
-  #game-grid { width: min(760px, 100%); max-height: calc(100vh - 220px); }
+  #game-grid { width: min(760px, 100%); }
 }
 
 /* Wide desktop: keep the stage centered with an arcade-cabinet vibe */
