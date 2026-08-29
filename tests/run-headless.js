@@ -126,6 +126,12 @@ load('js/games/pong.js');
 load('js/games/mergedrop.js');
 load('js/games/minesweeper.js');
 load('js/games/dodge.js');
+load('js/games/cave.js');
+load('js/games/lander.js');
+load('js/games/astro.js');
+load('js/games/memory.js');
+load('js/games/mole.js');
+load('js/games/ghostmaze.js');
 load('js/lobby.js');
 
 // ---------------- harness ----------------
@@ -317,18 +323,37 @@ function drive(mod, seconds, opts = {}) {
     RA.games.dodge.onPause(); RA.hideOverlay();
   }
 
+
+  // ---- cave / lander / astro / memory / mole / ghostmaze ----
+  for (const [id, sec, opts] of [
+    ['cave', 12, { holdRatio: 0.55 }],
+    ['lander', 12, { holdRatio: 0.4 }],
+    ['astro', 12, { holdRatio: 0.85 }],
+    ['memory', 8, { tapEvery: 25 }],
+    ['mole', 10, { tapEvery: 20 }],
+    ['ghostmaze', 12, { holdRatio: 0.7 }],
+  ]) {
+    console.log(`[${id}]`);
+    {
+      const r = drive(RA.games[id], sec, opts);
+      check(r.errors.length === 0, `no runtime errors in ${sec}s sim`);
+      RA.games[id].onPause && RA.games[id].onPause();
+      RA.hideOverlay();
+    }
+  }
+
   // ---- audio sequencer deep-check (notes parse & schedule without throwing) ----
   console.log('[audio]');
   {
     let ok = true;
     try {
-      for (const song of ['menu', 'runner', 'jumper', 'shooter', 'racing', 'rpg', 'worm', 'blockfall', 'brickbreak', 'flappy', 'stackup', 'snake', 'pong', 'mergedrop', 'minesweeper', 'dodge']) {
+      for (const song of ['menu', 'runner', 'jumper', 'shooter', 'racing', 'rpg', 'worm', 'blockfall', 'brickbreak', 'flappy', 'stackup', 'snake', 'pong', 'mergedrop', 'minesweeper', 'dodge', 'cave']) {
         RA.audio.playBGM(song);
         await new Promise(res => setTimeout(res, 120));   // let sequencer tick
         RA.audio.stopBGM();
       }
     } catch (e) { ok = false; console.error(e); }
-    check(ok, 'all 16 BGM tracks schedule without throwing');
+    check(ok, 'BGM tracks schedule without throwing');
 
     let sfxOk = true;
     try { for (const k of Object.keys(RA.audio.sfx)) RA.audio.sfx[k](); } catch (e) { sfxOk = false; console.error(e); }
@@ -342,7 +367,7 @@ function drive(mod, seconds, opts = {}) {
     try {
       refreshLobby();
       const grid = elements['game-grid'];
-      check(grid.children.length === 15, `15 cards rendered (got ${grid.children.length})`);
+      check(grid.children.length === GAMES.length, `${GAMES.length} cards rendered (got ${grid.children.length})`);
       check(elements['mission-list'].children.length === 3, `3 daily missions rendered (got ${elements['mission-list'].children.length})`);
       check(elements['shop-grid'].children.length === 5, `5 skin items rendered (got ${elements['shop-grid'].children.length})`);
       check(elements['ach-list'].children.length === RA.meta.achievementList().length, `achievements rendered (got ${elements['ach-list'].children.length})`);

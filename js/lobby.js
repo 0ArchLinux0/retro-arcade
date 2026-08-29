@@ -18,7 +18,8 @@ const GAMES = [
   { id: 'pong',     title: 'PONG DUEL',    desc: 'AI 패들 대전 · 7점 선승',      mod: 'pong',     hue: '#00eaff', icon: '◉' },
   { id: 'mergedrop', title: 'MERGE DROP',  desc: '숫자 드롭 머지 · 연쇄 콤보',   mod: 'mergedrop', hue: '#39ff14', icon: '⬢' },
   { id: 'minesweeper', title: 'MINESWEEPER', desc: '지뢰찾기 · 안전 칸 개봉',    mod: 'minesweeper', hue: '#9aa7ff', icon: '💣' },
-  { id: 'dodge',    title: 'DODGE ROYALE', desc: '탄막 생존 · 그레이즈 보너스',  mod: 'dodge',    hue: '#ff66d9', icon: '✺' }
+  { id: 'dodge',    title: 'DODGE ROYALE', desc: '탄막 생존 · 그레이즈 보너스',  mod: 'dodge',    hue: '#ff66d9', icon: '✺' },
+  { id: 'cave',     title: 'NEON CAVE',    desc: '홀드 추력 · 동굴 비행',       mod: 'cave',     hue: '#00eaff', icon: '◈' }
 ];
 
 function coinBadge() {

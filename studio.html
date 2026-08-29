@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RETRO ARCADE — STUDIO 4-SPLIT</title>
+<style>
+  :root {
+    --bg: #05010e; --panel: #0b0520;
+    --neon: #00eaff; --pink: #ff66d9;
+    --green: #7dff8a; --yellow: #ffe066;
+    --grid: #241a4d;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    height: 100%; background: var(--bg); overflow: hidden;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    color: #cfd8ff;
+  }
+  .bar {
+    height: 34px; display: flex; align-items: center; gap: 14px;
+    padding: 0 14px; background: var(--panel);
+    border-bottom: 1px solid var(--grid);
+    font-size: 11px; letter-spacing: .08em;
+  }
+  .bar b { color: var(--pink); }
+  .bar .rec {
+    color: #fff; background: #e33; border-radius: 3px;
+    padding: 2px 8px; animation: blink 1.1s steps(2) infinite;
+  }
+  @keyframes blink { 50% { opacity: .25; } }
+  .quad {
+    display: grid;
+    grid-template-columns: 1.35fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 6px; padding: 6px;
+    height: calc(100% - 34px);
+  }
+  .pane {
+    position: relative; background: var(--panel);
+    border: 1px solid var(--grid); border-radius: 6px; overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+  .pane h2 {
+    font-size: 10px; letter-spacing: .18em; padding: 7px 10px;
+    color: var(--neon); border-bottom: 1px solid var(--grid);
+    background: rgba(0,255,255,.04);
+  }
+  .pane h2 span { color: #556; }
+  #gameframe { flex: 1; width: 100%; border: 0; background: #000; }
+  /* dashboard */
+  #dash { flex: 1; padding: 10px 12px; overflow-y: auto; }
+  .metric { margin-bottom: 12px; }
+  .metric .k { font-size: 9px; letter-spacing: .16em; opacity: .55; }
+  .metric .v { font-size: 22px; color: var(--green); text-shadow: 0 0 12px rgba(125,255,138,.5); }
+  .bars { display: flex; align-items: flex-end; gap: 3px; height: 54px; margin-top: 6px; }
+  .bars i { width: 9px; background: var(--neon); box-shadow: 0 0 8px rgba(0,234,255,.6); min-height: 2px; }
+  table { width: 100%; border-collapse: collapse; font-size: 10px; }
+  td { padding: 3px 4px; border-bottom: 1px dashed #1a1240; }
+  td:last-child { text-align: right; color: var(--yellow); }
+  /* log */
+  #log {
+    flex: 1; overflow: hidden; padding: 8px 10px;
+    font-size: 10.5px; line-height: 1.55; white-space: pre-wrap;
+    word-break: break-all;
+  }
+  #log div { animation: slidein .18s ease-out; }
+  @keyframes slidein { from { transform: translateX(-8px); opacity: 0; } }
+  .t-LOOP   { color: var(--neon); } .t-PHYS { color: #b967ff; }
+  .t-AUDIO  { color: var(--yellow); } .t-SPAWN { color: var(--green); }
+  .t-COLLIDE{ color: var(--pink); } .t-META { color: #ffd257; }
+  .ts { color: #445; }
+  /* monitor */
+  #mon { flex: 1; padding: 10px 12px; font-size: 11px; line-height: 1.8; }
+  #mon b { color: var(--green); float: right; }
+  .meter { height: 8px; background: #16103a; border-radius: 4px; margin: 4px 0 12px; overflow: hidden; }
+  .meter i { display: block; height: 100%; background: linear-gradient(90deg, var(--neon), var(--pink)); transition: width .5s; }
+  .scan {
+    position: absolute; inset: 0; pointer-events: none;
+    background: repeating-linear-gradient(0deg, transparent 0 2px, rgba(0,0,0,.13) 2px 4px);
+  }
+</style>
+</head>
+<body>
+<div class="bar">
+  <span class="rec">● REC</span>
+  <b>RETRO ARCADE STUDIO</b>
+  <span id="clock">--:--:--</span>
+  <span style="opacity:.5">Q1 GAME · Q2 TELEMETRY · Q3 EVENT FIREHOSE · Q4 SYSTEM MONITOR</span>
+</div>
+
+<div class="quad">
+  <div class="pane">
+    <h2>Q1 · GAME RUNTIME <span>// live iframe</span></h2>
+    <iframe id="gameframe" src="/index.html?auto=cave"></iframe>
+  </div>
+
+  <div class="pane">
+    <h2>Q2 · TELEMETRY DASHBOARD</h2>
+    <div id="dash">
+      <div class="metric"><div class="k">SESSIONS PLAYED</div><div class="v" id="m-sessions">0</div></div>
+      <div class="metric"><div class="k">FPS (rolling)</div><div class="v" id="m-fps">60</div>
+        <div class="bars" id="fps-bars"></div></div>
+      <div class="metric"><div class="k">TOP GAMES THIS SESSION</div>
+        <table id="tbl"></table></div>
+    </div>
+  </div>
+
+  <div class="pane">
+    <h2>Q3 · EVENT FIREHOSE <span>// ~8 ev/s autoscroll</span></h2>
+    <div id="log"></div>
+  </div>
+
+  <div class="pane">
+    <h2>Q4 · SYSTEM MONITOR</h2>
+    <div id="mon"></div>
+  </div>
+</div>
+<div class="scan"></div>
+
+<script>
+'use strict';
+const $ = s => document.querySelector(s);
+
+setInterval(() => { $('#clock').textContent = new Date().toLocaleTimeString('ko-KR', { hour12: false }); }, 500);
+
+// honor ?game= / studio.js --game default via query
+(() => {
+  const g = new URLSearchParams(location.search).get('game') || 'cave';
+  const frame = $('#gameframe');
+  if (frame) frame.src = '/index.html?auto=' + encodeURIComponent(g);
+})();
+
+// ---- Q3 fast log + Q2/Q4 data via SSE ----
+const logEl = $('#log');
+const LOG_LINES = 46;
+let fpsHist = [];
+
+const es = new EventSource('/api/stream');
+
+function pushLog(d) {
+  const row = document.createElement('div');
+  row.className = `t-${d.tag}`;
+  const t = new Date(d.t).toISOString().slice(14, 23);
+  row.innerHTML = `<span class="ts">${t}</span> <b>[${d.tag}]</b> ${d.msg}`;
+  logEl.appendChild(row);
+  while (logEl.children.length > LOG_LINES) logEl.firstChild.remove();
+  logEl.scrollTop = logEl.scrollHeight;   // autoscroll = fast scroll on camera
+}
+
+function fpsBars() {
+  const t0 = performance.now();
+  requestAnimationFrame(() => {
+    fpsHist.push(Math.min(60, Math.round(1000 / Math.max(1, performance.now() - t0))));
+    if (fpsHist.length > 26) fpsHist.shift();
+    $('#fps-bars').innerHTML = fpsHist.map(f =>
+      `<i style="height:${Math.max(4, f / 60 * 100)}%;${f < 30 ? 'background:#e33' : ''}"></i>`).join('');
+    $('#m-fps').textContent = fpsHist[fpsHist.length - 1];
+  });
+}
+setInterval(fpsBars, 400);
+
+function renderDash(d) {
+  $('#m-sessions').textContent = Object.values(d.gameStarts).reduce((a, b) => a + b, 0);
+  const rows = Object.entries(d.gameStarts)
+    .sort((a, b) => b[1] - a[1]).slice(0, 6)
+    .map(([g, n]) => `<tr><td>${g.toUpperCase()}</td><td>${n} runs</td></tr>`).join('');
+  $('#tbl').innerHTML = rows || '<tr><td colspan="2">waiting…</td></tr>';
+}
+
+function renderMon(d) {
+  const up = `${String(Math.floor(d.uptime / 60)).padStart(2, '0')}:${String(d.uptime % 60).padStart(2, '0')}`;
+  const memPct = Math.min(100, d.mem / 4);
+  $('#mon').innerHTML = `
+    UPTIME <b>${up}</b>
+    <div class="meter"><i style="width:${Math.min(100, d.uptime % 100)}%"></i></div>
+    HEAP <b>${d.mem.toFixed(1)} MB</b>
+    <div class="meter"><i style="width:${memPct}%"></i></div>
+    LOAD AVG <b>${d.load.toFixed(2)}</b>
+    <div class="meter"><i style="width:${Math.min(100, d.load * 20)}%"></i></div>
+    HTTP REQ <b>${d.requests}</b>
+    <div class="meter"><i style="width:${Math.min(100, d.requests % 100)}%"></i></div>`;
+}
+
+es.onmessage = e => {
+  let d;
+  try { d = JSON.parse(e.data); } catch { return; }
+  if (d.type === 'log') pushLog(d);
+  else if (d.type === 'metrics') { renderDash(d); renderMon(d); }
+};
+</script>
+</body>
+</html>

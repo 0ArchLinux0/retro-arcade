@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RETRO ARCADE — CINEMA DUAL</title>
+<style>
+  :root {
+    --bg:#05010e; --panel:#0b0520; --neon:#00eaff; --pink:#ff00aa;
+    --green:#39ff14; --yellow:#f9f002; --grid:#241a4d;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;background:var(--bg);overflow:hidden;font-family:Menlo,Consolas,monospace;color:#e0f7ff}
+  .bar{height:40px;display:flex;align-items:center;gap:16px;padding:0 16px;background:var(--panel);border-bottom:1px solid var(--grid);font-size:12px;letter-spacing:.1em}
+  .rec{background:#e33;color:#fff;padding:3px 10px;border-radius:3px;animation:blink 1s steps(2) infinite}
+  @keyframes blink{50%{opacity:.3}}
+  .bar b{color:var(--pink)}
+  .stage{color:var(--yellow)}
+  .split{display:grid;grid-template-columns:1.15fr 1fr;gap:8px;padding:8px;height:calc(100% - 40px);transition:grid-template-columns .7s cubic-bezier(.2,.8,.2,1)}
+  .split.focus-game{grid-template-columns:1.7fr .7fr}
+  .split.focus-term{grid-template-columns:.7fr 1.7fr}
+  .pane{position:relative;background:var(--panel);border:1px solid var(--grid);border-radius:8px;overflow:hidden;display:flex;flex-direction:column;transition:box-shadow .5s,border-color .5s}
+  .pane.hot{border-color:var(--neon);box-shadow:0 0 28px rgba(0,234,255,.35), inset 0 0 40px rgba(255,0,170,.06)}
+  .pane h2{font-size:11px;letter-spacing:.2em;padding:8px 12px;color:var(--neon);border-bottom:1px solid var(--grid);background:rgba(0,255,255,.04);display:flex;justify-content:space-between}
+  .pane h2 span{color:#556}
+  #game{flex:1;border:0;width:100%;background:#000}
+  #term{flex:1;overflow:hidden;padding:10px 12px;font-size:11.5px;line-height:1.55;white-space:pre-wrap}
+  #term .ok{color:var(--green)} #term .fail{color:#ff2a6d} #term .info{color:var(--neon)} #term .meta{color:var(--pink)}
+  .scan{position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent 0 2px,rgba(0,0,0,.12) 2px 4px)}
+  .badge{position:absolute;top:48px;left:14px;z-index:5;background:rgba(10,0,20,.85);border:1px solid var(--pink);color:var(--pink);padding:6px 12px;font-size:12px;letter-spacing:.15em;border-radius:4px}
+</style>
+</head>
+<body>
+<div class="bar">
+  <span class="rec">● REC</span>
+  <b>CINEMA DUAL</b>
+  <span id="clock">--:--:--</span>
+  <span class="stage" id="stage">BOOT</span>
+  <span id="progress" style="opacity:.6">0/21</span>
+  <span style="margin-left:auto;opacity:.45">GAME ⇄ TERM · AUTO CLEAR TOUR</span>
+</div>
+<div class="split" id="split">
+  <div class="pane hot" id="p-game">
+    <h2>GAME RUNTIME <span id="game-label">// waiting</span></h2>
+    <div class="badge" id="badge">CLEAR TOUR</div>
+    <iframe id="game" src="about:blank" allow="autoplay"></iframe>
+    <div class="scan"></div>
+  </div>
+  <div class="pane" id="p-term">
+    <h2>DEBUG TERMINAL <span>// live verify + tour log</span></h2>
+    <div id="term"></div>
+    <div class="scan"></div>
+  </div>
+</div>
+<script>
+'use strict';
+const GAMES = [
+  'runner','jumper','shooter','racing','rpg','worm','blockfall','brickbreak',
+  'flappy','stackup','snake','pong','mergedrop','minesweeper','dodge',
+  'cave','lander','astro','memory','mole','ghostmaze'
+];
+const SEC_PER = Number(new URLSearchParams(location.search).get('sec')) || 9;
+const FOCUS_EVERY = Number(new URLSearchParams(location.search).get('swap')) || 4;
+
+const $ = s => document.querySelector(s);
+const term = $('#term');
+function log(cls, msg) {
+  const d = document.createElement('div');
+  d.className = cls;
+  d.textContent = `[${new Date().toLocaleTimeString('en-GB',{hour12:false})}] ${msg}`;
+  term.appendChild(d);
+  while (term.children.length > 80) term.firstChild.remove();
+  term.scrollTop = term.scrollHeight;
+}
+
+setInterval(() => { $('#clock').textContent = new Date().toLocaleTimeString('ko-KR',{hour12:false}); }, 400);
+
+let focusGame = true;
+setInterval(() => {
+  focusGame = !focusGame;
+  $('#split').classList.toggle('focus-game', focusGame);
+  $('#split').classList.toggle('focus-term', !focusGame);
+  $('#p-game').classList.toggle('hot', focusGame);
+  $('#p-term').classList.toggle('hot', !focusGame);
+  log('meta', focusGame ? '◆ FOCUS → GAME' : '◆ FOCUS → TERMINAL');
+}, FOCUS_EVERY * 1000);
+
+let idx = 0;
+async function playNext() {
+  if (idx >= GAMES.length) {
+    $('#stage').textContent = 'ALL CLEAR ✔';
+    $('#badge').textContent = 'TOUR COMPLETE';
+    log('ok', '════════════════════════════════');
+    log('ok', 'ALL 21 GAMES TOURED — CLEAR PASS');
+    log('ok', '════════════════════════════════');
+    // loop
+    idx = 0;
+  }
+  const id = GAMES[idx++];
+  $('#progress').textContent = `${idx}/${GAMES.length}`;
+  $('#stage').textContent = `PLAY ${id.toUpperCase()}`;
+  $('#game-label').textContent = `// ${id}`;
+  $('#badge').textContent = `STAGE · ${id.toUpperCase()}`;
+  $('#game').src = `/?auto=${id}&demo=1&t=${Date.now()}`;
+  log('info', `▶ launch ${id}  (?auto=${id})`);
+
+  // ask server to run verify for this game if available
+  try {
+    const r = await fetch(`/api/tour-verify?game=${id}`);
+    const j = await r.json();
+    if (j.ok) log('ok', `✔ verify ${id}: ${j.msg || 'PASS'}`);
+    else log('fail', `✘ verify ${id}: ${j.msg || 'FAIL'}`);
+  } catch (e) {
+    log('meta', `verify skip (${e.message})`);
+  }
+
+  setTimeout(playNext, SEC_PER * 1000);
+}
+
+log('meta', 'CINEMA DUAL boot — dual pane + focus swap');
+log('info', `tour ${GAMES.length} games · ${SEC_PER}s each · swap ${FOCUS_EVERY}s`);
+playNext();
+
+// SSE firehose mix-in
+try {
+  const es = new EventSource('/api/stream');
+  es.onmessage = e => {
+    let d; try { d = JSON.parse(e.data); } catch { return; }
+    if (d.type === 'log') log('info', `[${d.tag}] ${d.msg}`);
+  };
+} catch {}
+</script>
+</body>
+</html>

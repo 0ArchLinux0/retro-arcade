@@ -178,3 +178,5 @@ function mirrorSim() {
 const evts = mirrorSim();
 console.log('ideal-driver checkpoint events:', evts.length, JSON.stringify(evts.slice(0,10)));
 console.log(evts.length >= 12 ? 'PASS: full race possible with proper driving' : 'FAIL: even ideal driving cannot complete checkpoints — logic/window too tight');
+try { RA.audio.stopBGM(); } catch {}
+process.exit(evts.length >= 12 ? 0 : 1);

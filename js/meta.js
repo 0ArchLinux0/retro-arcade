@@ -14,7 +14,10 @@ RA.meta = (() => {
   const COIN_RATE = {
     runner: 0.05, jumper: 0.05, shooter: 0.04, racing: 0.06,
     rpg: 0.08, worm: 0.03, blockfall: 0.10, brickbreak: 0.08,
-    flappy: 0.15, stackup: 0.12, snake: 0.08, pong: 0.20, mergedrop: 0.10
+    flappy: 0.15, stackup: 0.12, snake: 0.08, pong: 0.20, mergedrop: 0.10,
+    minesweeper: 0.10, dodge: 0.06,
+    cave: 0.08, lander: 0.12, astro: 0.05,
+    memory: 0.15, mole: 0.20, ghostmaze: 0.08
   };
   // minimum score worth converting (anti-farm: exit on title screen = 0)
   const MIN_SCORE = 50;
@@ -41,7 +44,7 @@ RA.meta = (() => {
   const ACHIEVEMENTS = [
     { id: 'firstblood', name: 'FIRST BLOOD',   desc: '첫 게임 플레이',            reward: 20,  test: s => (s.lifetimePlays || 0) >= 1 },
     { id: 'veteran',    name: 'VETERAN',       desc: '누적 50판 플레이',          reward: 100, test: s => (s.lifetimePlays || 0) >= 50 },
-    { id: 'allrounder', name: 'ALL-ROUNDER',   desc: '전체 게임 13종 이상 플레이', reward: 150, test: s => Object.keys(s.stats || {}).filter(k => k.startsWith('game_')).length >= 13 },
+    { id: 'allrounder', name: 'ALL-ROUNDER',   desc: '전체 게임 21종 이상 플레이', reward: 150, test: s => Object.keys(s.stats || {}).filter(k => k.startsWith('game_')).length >= 21 },
     { id: 'rich',       name: 'HIGH ROLLER',   desc: '코인 누적 1000 획득',        reward: 80,  test: s => (s.totalEarned || 0) >= 1000 },
     { id: 'fashionista',name: 'FASHIONISTA',   desc: '스킨 3종 이상 보유',         reward: 60,  test: s => (s.owned || []).length >= 3 },
     { id: 'missionary', name: 'MISSIONARY',    desc: '일일 미션 10회 달성',        reward: 90,  test: s => (s.missionsDone || 0) >= 10 },

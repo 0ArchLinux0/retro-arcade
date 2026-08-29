@@ -367,6 +367,22 @@ RA.audio = (() => {
         'KhhSKhhSKhhSKhhS',
         'KhhSKhhSKhhSShKS'
       ]
+    },
+    cave: {
+      tempo: 132,
+      bars: 2,
+      lead: [
+        'E5 -- G5 -- B5 -- A5 -- G5 -- E5 -- D5 -- B4 --',
+        'C5 -- E5 -- G5 -- F5 -- E5 -- C5 -- B4 -- G4 --'
+      ],
+      bass: [
+        'E2 -- E2 E3 B1 -- B1 B2 C2 -- C2 C3 G1 -- G1 G2',
+        'A1 -- A1 A2 E2 -- E2 E3 F2 -- F2 F3 B1 -- B1 B2'
+      ],
+      drums: [
+        'KhShKhShKhShKhSh',
+        'KhShKhShKhSShSKS'
+      ]
     }
   };
 

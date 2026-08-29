@@ -124,3 +124,5 @@ console.log('final:', JSON.stringify(RA.games.racing.debug()));
 if (finished && events.length >= 12) console.log('\nPASS — full race completed');
 else if (events.length >= 6) console.log('\nPARTIAL PASS — laps progressing');
 else { console.log('\nFAIL'); process.exitCode = 1; }
+try { RA.audio.stopBGM(); } catch {}
+process.exit(process.exitCode || 0);

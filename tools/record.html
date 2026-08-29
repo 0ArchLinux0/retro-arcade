@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>Retro Arcade — Self Recorder</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#111; color:#eee; font-family:'Segoe UI',sans-serif; display:flex; flex-direction:column; height:100vh; }
+  header { padding:10px 16px; background:#1a1a2e; display:flex; gap:12px; align-items:center; border-bottom:1px solid #333; }
+  header b { color:#e94560; font-family:monospace; }
+  select, button { background:#16213e; color:#eee; border:1px solid #444; padding:8px 14px; border-radius:6px; font-size:14px; cursor:pointer; }
+  button:hover { border-color:#e94560; }
+  button.rec { background:#e94560; color:#fff; font-weight:bold; }
+  button.rec:disabled { background:#555; cursor:not-allowed; }
+  .status { margin-left:auto; font-family:monospace; color:#0f3460; background:#eee; padding:4px 12px; border-radius:12px; font-weight:bold; }
+  .status.on { color:#fff; background:#e94560; }
+  main { flex:1; position:relative; overflow:hidden; }
+  iframe { width:100%; height:100%; border:0; }
+  video { display:none; }
+</style>
+</head>
+<body>
+<header>
+  <b>SELF-RECORDER</b>
+  <select id="game"></select>
+  <select id="dur">
+    <option value="15">15초</option>
+    <option value="30" selected>30초</option>
+    <option value="60">60초</option>
+  </select>
+  <button id="start" class="rec">REC 시작</button>
+  <span class="status" id="status">IDLE</span>
+</header>
+<main><iframe id="frame" src="../index.html?auto=pong"></iframe></main>
+<video id="preview" muted></video>
+
+<script>
+const GAMES = [
+  ['pong','PONG DUEL'], ['snake','SNAKE CLASSIC'], ['flappy','FLAPPY WING'],
+  ['blockfall','BLOCK FALL'], ['brickbreak','BRICK BREAK'], ['stack','STACK UP'],
+  ['runner','NEON RUNNER'], ['skyhopper','SKY HOPPER'], ['galaxy','GALAXY RAIDERS'],
+  ['racing','TURBO RUSH'], ['rpg','DUNGEON DEPTHS'], ['worm','WORM.IO'],
+  ['mergedrop','MERGE DROP'], ['minesweeper','MINESWEEPER'], ['dodge','DODGE ROYALE'],
+];
+const $ = (id) => document.getElementById(id);
+GAMES.forEach(([id,label]) => {
+  const o = document.createElement('option'); o.value = id; o.textContent = label;
+  $('game').appendChild(o);
+});
+$('game').value = 'pong';
+
+function load() {
+  $('frame').src = '../index.html?auto=' + $('game').value;
+}
+$('game').addEventListener('change', load);
+
+// 게임 캔버스를 iframe 안에서 찾아 스트림으로 캡처한다.
+function grabCanvasStream() {
+  const doc = $('frame').contentDocument;
+  const cv = doc && (doc.querySelector('canvas#game') || doc.querySelector('canvas'));
+  if (!cv) throw new Error('게임 캔버스를 찾지 못했다 — 로드 후 다시 시도');
+  return cv.captureStream(30);
+}
+
+$('start').addEventListener('click', async () => {
+  try {
+    const stream = grabCanvasStream();
+    const chunks = [];
+    const mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
+      ? 'video/webm;codecs=vp9' : 'video/webm';
+    const rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 5_000_000 });
+    rec.ondataavailable = (e) => e.data.size && chunks.push(e.data);
+    rec.onstop = () => {
+      const blob = new Blob(chunks, { type: mime });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `retro-${$('game').value}-${new Date().toISOString().slice(0,19).replace(/[:T]/g,'')}.webm`;
+      a.click();
+      URL.revokeObjectURL(url);
+      $('status').textContent = 'SAVED'; $('status').classList.remove('on');
+      $('start').textContent = 'REC 시작'; $('start').disabled = false;
+    };
+    rec.start(250);
+    $('status').textContent = 'REC'; $('status').classList.add('on');
+    $('start').disabled = true;
+    // 자동 정지 타이머
+    setTimeout(() => rec.state !== 'inactive' && rec.stop(), Number($('dur').value) * 1000);
+  } catch (err) {
+    $('status').textContent = 'ERR'; $('status').classList.remove('on');
+    alert(err.message + '\n\niframe 이 아직 로드 중이거나 cross-origin 일 수 있다.');
+  }
+});
+
+load();
+</script>
+</body>
+</html>
