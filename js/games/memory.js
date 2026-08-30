@@ -186,7 +186,9 @@ RA.games.memory = (() => {
       get matched() { return matched; },
       get moves() { return moves; },
       get score() { return score; },
+      get started() { return started; },
       get dead() { return over; },
+      get over() { return over; },
       revealAll() { for (const c of cards) c.up = true; }
     };
   }

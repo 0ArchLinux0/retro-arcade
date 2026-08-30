@@ -1,5 +1,5 @@
 // Retro Arcade — minimal offline-first service worker
-const CACHE = 'ra-v8';
+const CACHE = 'ra-v9';
 const ASSETS = [
   './',
   './index.html',
@@ -24,6 +24,16 @@ const ASSETS = [
   './js/games/minesweeper.js',
   './js/games/dodge.js',
   './js/games/cave.js',
+  './js/games/memory.js',
+  './js/games/mole.js',
+  './js/games/lander.js',
+  './js/games/astro.js',
+  './js/games/ghostmaze.js',
+  './js/games/slot.js',
+  './js/games/arrowrain.js',
+  './js/games/bounce.js',
+  './js/games/hexmatch.js',
+  './js/games/chess.js',
   './js/meta.js',
   './icons/icon.svg',
   './icons/icon-192.png',

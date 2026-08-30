@@ -170,6 +170,9 @@ RA.games.mole = (() => {
       get score() { return score; },
       get timeLeft() { return timeLeft; },
       get dead() { return over; },
+      get over() { return over; },
+      get started() { return started; },
+      get grid() { return { gx0, gy0, cell, COLS, ROWS }; },
       setTime(s) { timeLeft = s; },
       pop(idx, bomb) { holes[idx] = { mole: !bomb, bomb, t: 0, life: 1 }; }
     };

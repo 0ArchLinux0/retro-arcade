@@ -17,7 +17,9 @@ RA.meta = (() => {
     flappy: 0.15, stackup: 0.12, snake: 0.08, pong: 0.20, mergedrop: 0.10,
     minesweeper: 0.10, dodge: 0.06,
     cave: 0.08, lander: 0.12, astro: 0.05,
-    memory: 0.15, mole: 0.20, ghostmaze: 0.08
+    memory: 0.15, mole: 0.20, ghostmaze: 0.08,
+    slot: 0.05, arrowrain: 0.10, bounce: 0.08,
+    hexmatch: 0.12, chess: 0.06
   };
   // minimum score worth converting (anti-farm: exit on title screen = 0)
   const MIN_SCORE = 50;

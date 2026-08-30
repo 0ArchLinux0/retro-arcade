@@ -132,6 +132,11 @@ load('js/games/astro.js');
 load('js/games/memory.js');
 load('js/games/mole.js');
 load('js/games/ghostmaze.js');
+load('js/games/slot.js');
+load('js/games/arrowrain.js');
+load('js/games/bounce.js');
+load('js/games/hexmatch.js');
+load('js/games/chess.js');
 load('js/lobby.js');
 
 // ---------------- harness ----------------
@@ -332,6 +337,11 @@ function drive(mod, seconds, opts = {}) {
     ['memory', 8, { tapEvery: 25 }],
     ['mole', 10, { tapEvery: 20 }],
     ['ghostmaze', 12, { holdRatio: 0.7 }],
+    ['slot', 6, { tapEvery: 30 }],
+    ['arrowrain', 12, { holdRatio: 0.9 }],
+    ['bounce', 15, { holdRatio: 0.7 }],
+    ['hexmatch', 8, { tapEvery: 20 }],
+    ['chess', 6, { holdRatio: 0.3, tapEvery: 40 }],
   ]) {
     console.log(`[${id}]`);
     {

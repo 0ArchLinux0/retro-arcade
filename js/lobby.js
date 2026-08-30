@@ -19,7 +19,17 @@ const GAMES = [
   { id: 'mergedrop', title: 'MERGE DROP',  desc: '숫자 드롭 머지 · 연쇄 콤보',   mod: 'mergedrop', hue: '#39ff14', icon: '⬢' },
   { id: 'minesweeper', title: 'MINESWEEPER', desc: '지뢰찾기 · 안전 칸 개봉',    mod: 'minesweeper', hue: '#9aa7ff', icon: '💣' },
   { id: 'dodge',    title: 'DODGE ROYALE', desc: '탄막 생존 · 그레이즈 보너스',  mod: 'dodge',    hue: '#ff66d9', icon: '✺' },
-  { id: 'cave',     title: 'NEON CAVE',    desc: '홀드 추력 · 동굴 비행',       mod: 'cave',     hue: '#00eaff', icon: '◈' }
+  { id: 'cave',     title: 'NEON CAVE',    desc: '홀드 추력 · 동굴 비행',       mod: 'cave',     hue: '#00eaff', icon: '◈' },
+  { id: 'memory',     title: 'MEMORY MATCH',  desc: '카드 짝 맞추기 · 제한 이동',      mod: 'memory',     hue: '#39ff14', icon: '🂠' },
+  { id: 'mole',       title: 'WHACK MOLE',    desc: '두더지 잡기 · 폭탄 회피',         mod: 'mole',       hue: '#ff8844', icon: '⛏' },
+  { id: 'lander',     title: 'LUNAR LANDER',  desc: '추력 · 연료 · 착륙 보너스',         mod: 'lander',     hue: '#f9f002', icon: '🚀' },
+  { id: 'astro',      title: 'ASTRO DODGE',   desc: '소행성 회피 · 360° 슈팅',          mod: 'astro',      hue: '#7dff8a', icon: '☄' },
+  { id: 'ghostmaze',  title: 'GHOST MAZE',    desc: '팰릿 · 유령 · 파워 모드',          mod: 'ghostmaze',  hue: '#b967ff', icon: '👻' },
+  { id: 'slot',       title: 'SLOT SPINNER',  desc: '3릴 매치 슬롯머신',                  mod: 'slot',       hue: '#f9f002', icon: '🎰' },
+  { id: 'arrowrain',  title: 'ARROW RAIN',    desc: '활 조준 · 화살 발사 · 목표 격파',  mod: 'arrowrain',  hue: '#7dff8a', icon: '➹' },
+  { id: 'bounce',     title: 'BOUNCE BALL',   desc: '패들 벽돌깨기 · 레벨 클리어',      mod: 'bounce',     hue: '#00eaff', icon: '◉' },
+  { id: 'hexmatch',   title: 'HEX MATCH',     desc: '육각 매치-3 · 연쇄 콤보',            mod: 'hexmatch',   hue: '#ff66d9', icon: '⬡' },
+  { id: 'chess',      title: 'CHESS PUZZLE',  desc: '체스 퍼즐 · AI 대전',                mod: 'chess',      hue: '#b967ff', icon: '♞' }
 ];
 
 function coinBadge() {
